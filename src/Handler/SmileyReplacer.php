@@ -1,0 +1,74 @@
+<?php
+
+
+declare( strict_types=1 );
+
+
+namespace Niirrty\Plate\Handler;
+
+
+class SmileyReplacer implements IHandler
+{
+
+
+   // <editor-fold desc="// – – –   P R O T E C T E D   F I E L D S   – – – – – – – – – – – – – – – – – – – – – –">
+
+   /**
+    * Smiley as key and image file url as value.
+    *
+    * @var array
+    */
+   protected $replacements;
+
+   // </editor-fold>
+
+
+   // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
+
+
+   /**
+    * SmileyReplacer constructor.
+    *
+    * @param array $replacements Smiley as key and image file url as value.
+    */
+   public function __construct( array $replacements )
+   {
+
+      $this->replacements = $replacements;
+
+   }
+
+   // </editor-fold>
+
+
+   // <editor-fold desc="// – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+
+   /**
+    * @param  string $contents
+    * @return string
+    */
+   public function execute( string $contents ) : string
+   {
+
+      if ( \count( $this->replacements ) < 1 )
+      {
+         return $contents;
+      }
+
+      $s = [];
+      $r = [];
+      foreach ( $this->replacements as $k => $v )
+      {
+         $s[] = $k;
+         $r[] = "<img src=\"{$v}\" alt=\"{$k}\" />";
+      }
+
+      return \str_replace( $s, $r, $contents );
+
+   }
+
+   // </editor-fold>
+
+
+}
+
