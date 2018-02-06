@@ -225,7 +225,7 @@ class Compiler
          $isCommentOpen = false;
 
          $w = \fopen( $compiledFile, 'wb' );
-         fwrite( $w, "<?php extract( \$this->data ); ?>\n" );
+         fwrite( $w, "<?php if ( ! isset( \$____plate ) ) { extract( \$this->data ); } ?>\n" );
          $lines = \file( $tplFilePath );
 
          foreach ( $lines as $l )
