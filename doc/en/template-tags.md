@@ -9,7 +9,7 @@ If you want to change it you can do it by different ways:
 1. Use a configuration file. The known formats and settings are described [here](/configuration-file.md)
 2. Configure it programmatically.
 
-After the opening char sequest one of the following character must follow:
+After the opening char sequence, one of the following character must follow:
 
 * `*` : Comments
 * `$` : Template-Var read access
@@ -23,20 +23,24 @@ After the opening char sequest one of the following character must follow:
 ### Variable read access
 
 ```
-{$Varname|filterfunction1:'param',…|filterfunction2|…}
+{$Varname|filter1|filter2|…}
 ```
 
-Each variable can be passed to one or more functions, separated by the pipe `|` symbol.
+Each variable can be passed to one or more filters, separated by the pipe `|` symbol.
 
-The used function(s) must accept the template variable as first parameter and can use more optional parameters
-It must return the new value.
+The usable filter(s) are the following
 
-The parameter list starts with `:`, each parameter must be defined PHP compatible. 2 or more must be separated by `,`
+* `escape`|`escape-html` (default): Escape $variable content for use in HTML context
+* `asIt`: Insert the template var content as it, without some escaping
+* `asJSON`: Convert variable content to JSON format before output.
 
-You can also access variables as arrays and objects by using regular PHP syntax:
+You can also access variables as arrays and objects by using regular PHP object access syntax
+and also arrays by dot notation:
 
 ```php
-$foo[ 0 ][ 'bar' ]->baz()
+$foo.0.bar->baz().blub.$i
+// Will result in
+$foo[0]['bar']->baz()['blub'][$i]
 ```
 
 
@@ -80,7 +84,7 @@ Loops and Conditions always ends with a end tag in format `{/TAGNAME]` or altern
 
 ```
   {foreach from=$Varname key=key value=value}
-    {$key|escape:'json'}: {$value->__toString()}
+    {$key|asJSON}: {$value->__toString()|asIt}
   {/foreach}
 ```
 
@@ -94,9 +98,9 @@ The following params are known:
 
 ```
   {for from=$Varname index=i count=c step=1 init=0}
-    {$Varname[$i]['Name']}: {$Varname[$i]['Value']}
+    {$Varname.$i.Name}: {$Varname.$i.Value}
     {if ($i%1) == 0}
-      <strong>{$Varname[$i]['Status']}</strong>
+      <strong>{$Varname.$i.Status}</strong>
     {else}
       …
     {/if}
@@ -115,7 +119,7 @@ The following params are known:
 ### Conditions
 
 ```
-  {if isset($Varname['Key'])}
+  {if isset($Varname.Key)}
     …
   {elseif ($Varname % 2) != 0}
     …
@@ -132,4 +136,10 @@ The following params are known:
 
 ```
 {# file/to/include.tpl}
+```
+
+The file part cal also point to an other known template var
+
+```
+{# $pathOfTplFile}
 ```

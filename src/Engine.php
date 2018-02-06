@@ -8,6 +8,7 @@ namespace Niirrty\Plate;
 
 
 
+use Niirrty\IO\Path;
 use Niirrty\Plate\Handler\IHandler;
 
 
@@ -182,6 +183,14 @@ class Engine implements \ArrayAccess
    }
 
    // </editor-fold>
+
+   protected function includeWithCaching( string $templateFile, ?string $package = null )
+   {
+      $comp      = new Compiler( $this->config );
+      $cacheFile = Path::Unixize( $comp->compile( $templateFile, $package ) );
+      /** @noinspection PhpIncludeInspection */
+      include $cacheFile;
+   }
 
 
 }

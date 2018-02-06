@@ -444,26 +444,46 @@ class Compiler
          // There are one or more filters defined
 
          // Get the variable name
-         $var = \trim( $tmp[ 0 ] );
+         $var = $this->normalizeVar( \trim( $tmp[ 0 ] ) );
 
          // Get the filters and reverse them: e.g. trim|escape:'htmlall' => escape:'htmlall'|trim
          $filters = \array_reverse( ArrayHelper::Remove($tmp, 0 ) );
          $appendix = '';
          $contents = '<?php echo ';
 
+         if ( 1 > \count( $filters ) )
+         {
+            $filters = [ 'escape' ];
+         }
+
          // Loop all defined filters
          foreach ( $filters as $filter )
          {
-            $tmpFilter = \explode( ':', $filter, 2 );
-            if ( 2 === \count( $tmpFilter ) )
+            switch ( \strtolower( $filter ) )
             {
-               $appendix .= ", {$tmpFilter[1]} )";
-               $filter = $tmpFilter[ 0 ];
+               case 'escape':
+               case 'escape-html':
+               case 'escapehtml':
+                  $filter = '\\Niirrty\\escapeXML';
+                  break;
+               case 'asit':
+                  $filter = '';
+                  break;
+               case 'asjson':
+                  $filter = '\\json_encode';
+                  break;
+               default:
+                  if ( ! \function_exists( $filter ) )
+                  {
+                     $filter = '';
+                  }
+                  break;
             }
-            else
+            if ( '' === $filter )
             {
-               $appendix .= ' )';
+               continue;
             }
+            $appendix .= ' )';
             if ( $filter[ 0 ] !== '\\' )
             {
                $contents .= '\\';
@@ -473,6 +493,12 @@ class Compiler
 
          $contents .= "{$var}{$appendix}; ?>";
          return $contents;
+
+      }
+      else
+      {
+
+         $var = $this->normalizeVar( $var );
 
       }
 
@@ -494,9 +520,20 @@ class Compiler
    {
 
       // {# file/to/include.tpl}
+      // or
+      // {# $fileFromEngineVariable}
 
       // Remove the leading # and whitespaces before and after.
       $tagDefinition = \trim( \ltrim( $tagDefinition, '#' ) );
+
+      if ( \preg_match( '~^\\$[A-Za-z_][A-Za-z0-9_]*$~', $tagDefinition ) )
+      {
+         return '<?php $this->includeWithCaching( ' .
+                $tagDefinition .
+                ', ' .
+                \json_encode( $package ) .
+                ' ); ?> ';
+      }
 
       if ( null !== $package && '' !== $package )
       {
@@ -536,7 +573,7 @@ class Compiler
 
       $tmp = \explode( ' ', $tagDefinition, 2 );
 
-      if ( \count( $tmp ) != 2 )
+      if ( \count( $tmp ) !== 2 )
       {
          return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
       }
@@ -549,7 +586,7 @@ class Compiler
          {
             return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
          }
-         $attr[ 'from'  ] = '$' . \ltrim( \trim( $attr[ 'from'  ] ), '$' );
+         $attr[ 'from'  ] = '$' . \ltrim( \trim( $this->normalizeVar( $attr[ 'from'  ] ) ), '$' );
          $attr[ 'value' ] = '$' . \ltrim( \trim( $attr[ 'value' ] ), '$' );
          if ( isset( $attr[ 'key' ] ) )
          {
@@ -572,7 +609,7 @@ class Compiler
          {
             return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
          }
-         $attr[ 'from'  ]   = '$' . \ltrim( \trim( $attr[ 'from'  ] ), '$' );
+         $attr[ 'from'  ]   = '$' . \ltrim( \trim( $this->normalizeVar( $attr[ 'from'  ] ) ), '$' );
          $attr[ 'index' ]   = isset( $attr[ 'index' ] ) ? ( '$' . \ltrim( \trim( $attr[ 'index'  ] ), '$' ) ) : '$i';
          $attr[ 'count' ]   = isset( $attr[ 'count' ] ) ? ( '$' . \ltrim( \trim( $attr[ 'count'  ] ), '$' ) ) : '$c';
          $attr[ 'step'  ]   = isset( $attr[ 'step'  ] ) ? (int) $attr[ 'step' ] : 1;
@@ -619,6 +656,154 @@ class Compiler
 
       return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
 
+   }
+
+   private function normalizeVar( string $varDefinition ) : string
+   {
+
+      $parts = \preg_split( '~([."\'-])~', $varDefinition, -1, \PREG_SPLIT_DELIM_CAPTURE );
+
+      $partsCount = \count( $parts );
+
+      if ( 2 > $partsCount )
+      {
+         return $varDefinition;
+      }
+
+      $tmp = [];
+
+      for ( $i = 0, $j = 0; $i < $partsCount; $i += 2 )
+      {
+
+         if ( $i === 0 )
+         {
+            $tmp[] = [ 'operator' => false, 'parts' => [ \trim( $parts[ $i ] ) ] ];
+            continue;
+         }
+
+         switch ( $parts[ $i - 1 ] )
+         {
+
+            case '.':
+               if ( '.' === $tmp[ $j ][ 'operator' ] )
+               {
+                  $tmp[ $j ][ 'parts' ][] = \trim( $parts[ $i ] );
+                  break;
+               }
+               if ( '"' === $tmp[ $j ][ 'operator' ] || '\'' === $tmp[ $j ][ 'operator' ] )
+               {
+                  $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
+                  $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
+                  break;
+               }
+               $j++;
+               $tmp[] = [ 'operator' => '.', 'parts' => [ \trim( $parts[ $i ] ) ] ];
+               break;
+
+            case '-':
+               if ( false === $tmp[ $j ][ 'operator' ] )
+               {
+                  $tmp[ $j ][ 'parts' ][] = \trim( $parts[ $i - 1 ] );
+                  $tmp[ $j ][ 'parts' ][] = \trim( $parts[ $i ] );
+                  break;
+               }
+               if ( '"' === $tmp[ $j ][ 'operator' ] || '\'' === $tmp[ $j ][ 'operator' ] )
+               {
+                  $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
+                  $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
+                  break;
+               }
+               $j++;
+               $tmp[] = [ 'operator' => false, 'parts' => [ \trim( $parts[ $i - 1 ] ) ] ];
+               $tmp[ $j ][ 'parts' ][] = \trim( $parts[ $i ] );
+               break;
+
+            case '"':
+               if ( '"' === $tmp[ $j ][ 'operator' ] )
+               {
+                  // Current " maybe close the open string "…
+                  if ( $this->strEndsWithEscapeChar( $tmp[ $j ][ 'parts' ][ \count( $tmp[ $j ][ 'parts' ] ) - 1 ] ) )
+                  {
+                     // The " is escaped
+                     $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
+                     $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
+                     break;
+                  }
+                  // Current " closes the open string "…
+                  $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
+                  $tmp[ $j ][ 'operator' ] = false;
+                  $j++;
+                  $tmp[] = [ 'operator' => false, 'parts' => [ \trim( $parts[ $i ] ) ] ];
+                  break;
+               }
+               // Current " opens a new string
+               $j++;
+               $tmp[] = [ 'operator' => '"', 'parts' => [ $parts[ $i - 1 ], $parts[ $i ] ] ];
+               break;
+
+            case '\'':
+               if ( '\'' === $tmp[ $j ][ 'operator' ] )
+               {
+                  // Current ' maybe close the open string '…
+                  if ( $this->strEndsWithEscapeChar( $tmp[ $j ][ 'parts' ][ \count( $tmp[ $j ][ 'parts' ] ) - 1 ] ) )
+                  {
+                     // The ' is escaped
+                     $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
+                     $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
+                     break;
+                  }
+                  // Current ' close the open string '…
+                  $tmp[ $j ][ 'parts' ][]  = $parts[ $i - 1 ];
+                  $tmp[ $j ][ 'operator' ] = false;
+                  $j++;
+                  $tmp[] = [ 'operator' => false, 'parts' => [ $parts[ $i ] ] ];
+                  break;
+               }
+               // Current ' opens a new string
+               $j++;
+               $tmp[] = [ 'operator' => '\'', 'parts' => [ $parts[ $i - 1 ], $parts[ $i ] ] ];
+               break;
+
+         }
+
+      }
+
+      $normalized = '';
+      foreach ( $tmp as $partsGroup )
+      {
+
+         if ( false === $partsGroup[ 'operator' ] )
+         {
+            $normalized .= \implode( '', $partsGroup[ 'parts' ] );
+            continue;
+         }
+
+         for ( $i = 0, $c = \count( $partsGroup[ 'parts' ] ); $i < $c; $i++ )
+         {
+            if ( '' !== $partsGroup[ 'parts' ][ $i ] &&
+                 ( '$' === $partsGroup[ 'parts' ][ $i ][ 0 ] || \is_numeric( $partsGroup[ 'parts' ][ $i ] ) ) )
+            {
+               continue;
+            }
+            $partsGroup[ 'parts' ][ $i ] = \json_encode( $partsGroup[ 'parts' ][ $i ] );
+         }
+
+         $normalized .= '[' . \implode( '][', $partsGroup[ 'parts' ] ) . ']';
+
+      }
+
+      return $normalized;
+
+   }
+
+   private function strEndsWithEscapeChar( string $str ) : bool
+   {
+      if ( ! \preg_match( '~(\\\\+)$~', $str, $matches ) )
+      {
+         return false;
+      }
+      $backSlashCount = \strlen( $matches[ 1 ] );
+      return 0 !== $backSlashCount && 0 !== ( $backSlashCount % 2 );
    }
 
    # </editor-fold>
