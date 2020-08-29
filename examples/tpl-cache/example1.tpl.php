@@ -1,4 +1,4 @@
-<?php extract( $this->data ); ?>
+<?php if ( ! isset( $____plate ) ) { extract( $this->data ); } ?>
 Ein Integer: <?= $int; ?> 
 Ein Float  : <?= $float; ?> 
 Ein Boolean: <?php if ( $bool ) { ?>TRUE<?php } else { ?>FALSE<?php } ?> 

@@ -1,16 +1,22 @@
 <?php
 
+
 include dirname( __DIR__ ) . '/vendor/autoload.php';
 
+
+use Niirrty\IO\Vfs\VfsManager;
+
+
+$tplVfs = \Niirrty\IO\Vfs\VfsHandler::Create(
+    'Templates root folder', 'tpl', '://', __DIR__ . DIRECTORY_SEPARATOR . 'templates' );
+$cacheVfs = \Niirrty\IO\Vfs\VfsHandler::Create(
+    'Template cache root folder', 'cache', '://', __DIR__ . DIRECTORY_SEPARATOR . 'tpl-cache' );
+$vfsManager = VfsManager::Create();
+$vfsManager->addHandler( $tplVfs );
+$vfsManager->addHandler( $cacheVfs );
+
 $config = \Niirrty\Plate\Config::FromINIFile(
-   'tpl-root:/plate-config.ini',
-   'ini',
-   \Niirrty\IO\Vfs\Manager::Create()
-      ->addHandler(
-         \Niirrty\IO\Vfs\Handler::Create( 'Templates root folder' )
-            ->setProtocol( 'tpl-root', ':/' )
-            ->setRootFolder( __DIR__ )
-      )
+   __DIR__ . DIRECTORY_SEPARATOR . 'plate-config.ini', 'ini', $vfsManager
 );
 
 #$config->setCacheCompileLifetime( 5 );

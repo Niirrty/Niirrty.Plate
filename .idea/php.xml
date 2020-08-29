@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PhpProjectSharedConfiguration" php_language_level="7.1" />
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-ctype" />
+      <path value="$PROJECT_DIR$/vendor/niirrty/niirrty.observer" />
+      <path value="$PROJECT_DIR$/vendor/niirrty/niirrty.io.vfs" />
+      <path value="$PROJECT_DIR$/vendor/niirrty/niirrty.io" />
+      <path value="$PROJECT_DIR$/vendor/niirrty/niirrty.db" />
+      <path value="$PROJECT_DIR$/vendor/niirrty/niirrty.core" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
+    </include_path>
+  </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="7.3" />
 </project>

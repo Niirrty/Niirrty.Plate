@@ -38,9 +38,9 @@ You can also access variables as arrays and objects by using regular PHP object 
 and also arrays by dot notation:
 
 ```php
-$foo.0.bar->baz().blub.$i
+// $foo.0.bar->baz().blub.$i
 // Will result in
-$foo[0]['bar']->baz()['blub'][$i]
+$foo[ 0 ][ 'bar' ]->baz()[ 'blub' ][ $i ]
 ```
 
 

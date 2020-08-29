@@ -1,4 +1,11 @@
 <?php
+/**
+ * @author     Ni Irrty <niirrty+code@gmail.com>
+ * @copyright  © 2017-2020, Niirrty
+ * @package    Niirrty\Plate\Handler
+ * @since      2017-11-04
+ * @version    0.3.0
+ */
 
 
 declare( strict_types=1 );
@@ -16,13 +23,14 @@ interface IHandler
 {
 
 
-   /**
-    * Calls the output handler with defined content.
-    *
-    * @param  string $contents
-    * @return string
-    */
-   function execute( string $contents ) : string;
+    /**
+     * Calls the output handler with defined content.
+     *
+     * @param string $contents
+     *
+     * @return string
+     */
+    function execute( string $contents ): string;
 
 
 }
