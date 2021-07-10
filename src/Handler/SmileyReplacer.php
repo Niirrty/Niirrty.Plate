@@ -14,10 +14,6 @@ declare( strict_types=1 );
 namespace Niirrty\Plate\Handler;
 
 
-use function count;
-use function str_replace;
-
-
 class SmileyReplacer implements IHandler
 {
 
@@ -63,7 +59,7 @@ class SmileyReplacer implements IHandler
     public function execute( string $contents ): string
     {
 
-        if ( count( $this->replacements ) < 1 )
+        if ( \count( $this->replacements ) < 1 )
         {
             return $contents;
         }
@@ -76,7 +72,7 @@ class SmileyReplacer implements IHandler
             $r[] = "<img src=\"{$v}\" alt=\"{$k}\" />";
         }
 
-        return str_replace( $s, $r, $contents );
+        return \str_replace( $s, $r, $contents );
 
     }
 

@@ -14,46 +14,13 @@ declare( strict_types=1 );
 namespace Niirrty\Plate;
 
 
-use Niirrty\ArgumentException;
-use Niirrty\ArrayHelper;
-use Niirrty\DB\Connection;
-use Niirrty\DB\DBException;
-use Niirrty\DB\Driver\SQLite;
-use Niirrty\IO\Folder;
-use Niirrty\IO\Path;
-use Throwable;
-use function abs;
-use function array_reverse;
-use function chmod;
-use function count;
-use function dirname;
-use function explode;
-use function fclose;
-use function file;
-use function file_exists;
-use function filemtime;
-use function fopen;
-use function function_exists;
-use function fwrite;
-use function hash_file;
-use function implode;
-use function in_array;
-use function is_dir;
-use function is_numeric;
-use function json_encode;
-use function ltrim;
-use function Niirrty\strContains;
-use function Niirrty\strEndsWith;
-use function Niirrty\substring;
-use function preg_match;
-use function preg_split;
-use function rtrim;
-use function strlen;
-use function strtolower;
-use function time;
-use function touch;
-use function trim;
-use const PREG_SPLIT_DELIM_CAPTURE;
+use \Niirrty\ArgumentException;
+use \Niirrty\DB\{Connection, DBException, Driver\SQLite};
+use \Niirrty\IO\{Folder, Path};
+use \Niirrty\Plate\TagParser\{
+    BlockTagParser, EndTagParser, IncludeTagParser, IPlateTagParser, TranslationTagParser, VarInTagParser, VarOutTagParser
+};
+use function \Niirrty\{strContains, strEndsWith, substring};
 
 
 /**
@@ -81,6 +48,11 @@ class Compiler
      */
     private static $_cacheDBs = [];
 
+    /**
+     * @var IPlateTagParser[]|array
+     */
+    private $_tagParser;
+
     // </editor-fold>
 
 
@@ -107,6 +79,15 @@ class Compiler
             );
         }
 
+        $this->_tagParser = [
+            new VarInTagParser( $this->_config ),
+            new VarOutTagParser( $this->_config ),
+            new IncludeTagParser( $this->_config ),
+            new TranslationTagParser( $this->_config ),
+            new BlockTagParser( $this->_config ),
+            new EndTagParser( $this->_config )
+        ];
+
     }
 
     // </editor-fold>
@@ -118,11 +99,10 @@ class Compiler
      * Compiles the template file.
      *
      * @param string      $tplFile The template file that should be compiled
-     * @param string|null $package Optional package name
-     *
-     * @return string               Return the full path of the compiled php file.
+     * @param string|null $package Optional package name. Is used as sub folder inside the template folder
+     * @return string              Return the full path of the compiled php file.
      * @throws CompileException
-     * @throws Throwable
+     * @throws \Throwable
      * @throws DBException
      */
     public function compile( $tplFile, ?string $package = null ): string
@@ -159,7 +139,7 @@ class Compiler
                 {
                     Folder::Create( $compileFolder, 0775 );
                 }
-                catch ( Throwable $ex )
+                catch ( \Throwable $ex )
                 {
                     throw new CompileException(
                         $tplFile,
@@ -172,15 +152,15 @@ class Compiler
         }
 
         $compiledFile = Path::Combine( $compileFolder, $tplFile . '.php' );
-        $tmpFolder = dirname( $compiledFile );
+        $tmpFolder = \dirname( $compiledFile );
 
-        if ( !is_dir( $tmpFolder ) )
+        if ( ! \is_dir( $tmpFolder ) )
         {
             try
             {
                 Folder::Create( $tmpFolder, 0775 );
             }
-            catch ( Throwable $ex )
+            catch ( \Throwable $ex )
             {
                 throw new CompileException(
                     $tplFile,
@@ -198,11 +178,11 @@ class Compiler
 
         if ( 0 < $compileLifeTime &&
              Config::CACHE_MODE_EDITOR !== $this->_config->getCacheMode() &&
-             file_exists( $compiledFile ) )
+             \file_exists( $compiledFile ) )
         {
             // There is a lifetime defined and the cache file exists
 
-            if ( filemtime( $compiledFile ) + $compileLifeTime >= time() )
+            if ( \filemtime( $compiledFile ) + $compileLifeTime >= \time() )
             {
                 // The existing cache file is valid, use it
                 return $compiledFile;
@@ -217,10 +197,10 @@ class Compiler
                 false
             );
 
-            if ( $checksum === hash_file( 'sha512', $tplFilePath ) )
+            if ( $checksum === \hash_file( 'sha512', $tplFilePath ) )
             {
                 // all is fine => use the cache
-                touch( $compiledFile );
+                \touch( $compiledFile );
 
                 return $compiledFile;
             }
@@ -257,6 +237,21 @@ class Compiler
 
     }
 
+    /**
+     * Registers a external template tag parser.
+     *
+     * @param IPlateTagParser $parser
+     * @return Compiler
+     */
+    public function registerTagParser( IPlateTagParser $parser ) : Compiler
+    {
+
+        $this->_tagParser[] = $parser;
+
+        return $this;
+
+    }
+
     // </editor-fold>
 
 
@@ -266,8 +261,7 @@ class Compiler
      * @param string      $tplFilePath
      * @param string      $compiledFile
      * @param string|null $package
-     *
-     * @throws Throwable
+     * @throws \Throwable
      */
     private function parse( string $tplFilePath, string $compiledFile, ?string $package )
     {
@@ -275,23 +269,25 @@ class Compiler
         $w = null;
         $openChars = $this->_config->getOpenChars();
         $closeChars = $this->_config->getCloseChars();
-        $closeLen = strlen( $closeChars );
-        $openLen = strlen( $openChars );
+        $closeLen = \strlen( $closeChars );
+        $openLen = \strlen( $openChars );
 
         try
         {
 
             $isCommentOpen = false;
 
-            $w = fopen( $compiledFile, 'wb' );
-            fwrite( $w, "<?php if ( ! isset( \$____plate ) ) { extract( \$this->data ); } ?>\n" );
-            $lines = file( $tplFilePath );
+            $w = \fopen( $compiledFile, 'wb' );
+            \fwrite( $w, "<?php if ( ! isset( \$____plate ) ) { extract( \$this->data ); \$hasTranslator = null !== \$this->translator; } ?>\n" );
+            $lines = \file( $tplFilePath );
 
             foreach ( $lines as $l )
             {
 
+                //remove white space from the end of the line
                 $line = rtrim( $l, "\r\n\t " );
 
+                // If the line is empty, simple write a new line
                 if ( $line == '' )
                 {
                     fwrite( $w, "\n" );
@@ -367,36 +363,38 @@ class Compiler
 
                     $tagDefinition = substring( $afterTagOpen, 0, $idx );
                     $afterTagClose = substring( $afterTagOpen, $idx + $closeLen );
-                    $newLineAfter = "\n";
+                    $newLineAfter  = "\n";
+                    $handled       = false;
+
+                    foreach ( $this->_tagParser as $tagParser )
+                    {
+                        if ( $tagParser->parse( $tagDefinition, $afterTagClose, $newLineAfter, $package ) )
+                        {
+                            $res = $tagParser->getCompiled();
+                            $afterTagClose = $res->getAfterTagClose();
+                            $newLineAfter = $res->getNewLineAfter();
+                            \fwrite( $w, $res->getPhpCode() );
+                            $handled = true;
+                            break;
+                        }
+                    }
+
+                    if ( $handled )
+                    {
+                        if ( '' !== $afterTagClose )
+                        {
+                            $line = $afterTagClose;
+                            continue;
+                        }
+                        else
+                        {
+                            \fwrite( $w, $newLineAfter );
+                            break;
+                        }
+                    }
 
                     switch ( $tagDefinition[ 0 ] )
                     {
-
-                        // Variable read access
-                        case '$':
-                            fwrite( $w, $this->extractVarEcho( $tagDefinition ) );
-                            $newLineAfter = " \n";
-                            break;
-
-                        // Variable write/create access
-                        case '+':
-                            if ( !isset( $tagDefinition[ 1 ] ) || $tagDefinition[ 1 ] != '$' )
-                            {
-                                // Invalid/unknown tag
-                                fwrite( $w, $openChars );
-                                $afterTagClose = $tagDefinition . $closeChars . $afterTagClose;
-                                $newLineAfter = " \n";
-                                break;
-                            }
-                            fwrite( $w, $this->extractVarAdd( $tagDefinition ) );
-                            $newLineAfter = "\n";
-                            break;
-
-                        // Include other template
-                        case '#':
-                            fwrite( $w, $this->extractInclude( $tagDefinition, $package ) );
-                            $newLineAfter = "";
-                            break;
 
                         case '*':
                             if ( '*' !== $tagDefinition[ strlen( $tagDefinition ) - 1 ] )
@@ -406,23 +404,8 @@ class Compiler
                             $newLineAfter = "";
                             break;
 
-                        case 'i': // if
-                        case 'e': // else|elseif|end
-                        case 'f': // for|foreach
-                            if ( 'end' === $tagDefinition )
-                            {
-                                $newLineAfter = " \n";
-                            }
-                            fwrite( $w, $this->extractBlock( $tagDefinition ) );
-                            break;
-
-                        case '/':
-                            $newLineAfter = " \n";
-                            fwrite( $w, $this->extractEnd( $tagDefinition ) );
-                            break;
-
                         default :
-                            fwrite( $w, $this->_config->getOpenChars() );
+                            \fwrite( $w, $this->_config->getOpenChars() );
                             $afterTagClose = $tagDefinition .
                                              $this->_config->getCloseChars() .
                                              $afterTagClose;
@@ -436,7 +419,7 @@ class Compiler
                     }
                     else
                     {
-                        fwrite( $w, $newLineAfter );
+                        \fwrite( $w, $newLineAfter );
                         break;
                     }
 
@@ -444,16 +427,16 @@ class Compiler
 
             }
 
-            fclose( $w );
+            \fclose( $w );
             $w = null;
-            chmod( $compiledFile, 0750 );
+            \chmod( $compiledFile, 0750 );
 
         }
-        catch ( Throwable $ex )
+        catch ( \Throwable $ex )
         {
             if ( null !== $w )
             {
-                fclose( $w );
+                \fclose( $w );
             }
             throw $ex;
         }
@@ -474,7 +457,7 @@ class Compiler
         else
         {
             $dbFile = Path::Combine( $this->_config->getCacheCompileFolder(), 'plate.sqlite3' );
-            $dbExist = file_exists( $dbFile );
+            $dbExist = \file_exists( $dbFile );
             $this->_cacheDB = new Connection( ( new SQLite() )->setDb( $dbFile ) );
             // Create the DB with the table if it not exists
             if ( !$dbExist )
@@ -492,427 +475,6 @@ class Compiler
             }
         }
 
-    }
-
-    /**
-     * @param $tagDefinition
-     *
-     * @return string
-     */
-    private function extractVarEcho( $tagDefinition )
-    {
-
-        // Split into var and filter
-        $tmp = preg_split( '~(?<!\\\\)\\|~', $tagDefinition );
-        $var = $tagDefinition;
-
-        if ( count( $tmp ) > 1 )
-        {
-
-            // There are one or more filters defined
-
-            // Get the variable name
-            $var = $this->normalizeVar( trim( $tmp[ 0 ] ) );
-
-            // Get the filters and reverse them: e.g. trim|escape:'htmlall' => escape:'htmlall'|trim
-            $filters = array_reverse( ArrayHelper::Remove( $tmp, 0 ) );
-            $appendix = '';
-            $contents = '<?php echo ';
-
-            if ( 1 > count( $filters ) )
-            {
-                $filters = [ 'escape' ];
-            }
-
-            // Loop all defined filters
-            foreach ( $filters as $filter )
-            {
-                switch ( strtolower( $filter ) )
-                {
-                    case 'escape':
-                    case 'escape-html':
-                    case 'escapehtml':
-                        $filter = '\\Niirrty\\escapeXML';
-                        break;
-                    case 'asit':
-                        $filter = '';
-                        break;
-                    case 'asjson':
-                        $filter = '\\json_encode';
-                        break;
-                    default:
-                        if ( !function_exists( $filter ) )
-                        {
-                            $filter = '';
-                        }
-                        break;
-                }
-                if ( '' === $filter )
-                {
-                    continue;
-                }
-                $appendix .= ' )';
-                if ( $filter[ 0 ] !== '\\' )
-                {
-                    $contents .= '\\';
-                }
-                $contents .= "{$filter}( ";
-            }
-
-            $contents .= "{$var}{$appendix}; ?>";
-
-            return $contents;
-
-        }
-        else
-        {
-
-            $var = $this->normalizeVar( $var );
-
-        }
-
-        $contents = "<?= {$var}; ?>";
-
-        return $contents;
-
-    }
-
-    /**
-     * @param $tagDefinition
-     *
-     * @return string
-     */
-    private function extractVarAdd( $tagDefinition )
-    {
-
-        # +$var = 'value'
-
-        return '<?php ' . ltrim( $tagDefinition, '+' ) . '; ?> ';
-
-    }
-
-    /**
-     * @param             $tagDefinition
-     * @param string|null $package
-     *
-     * @return string
-     * @throws ArgumentException
-     * @throws CompileException
-     * @throws DBException
-     * @throws Throwable
-     */
-    private function extractInclude( $tagDefinition, ?string $package )
-    {
-
-        // {# file/to/include.tpl}
-        // or
-        // {# $fileFromEngineVariable}
-
-        // Remove the leading # and whitespaces before and after.
-        $tagDefinition = trim( ltrim( $tagDefinition, '#' ) );
-
-        if ( preg_match( '~^\\$[A-Za-z_][A-Za-z0-9_]*$~', $tagDefinition ) )
-        {
-            return '<?php $this->includeWithCaching( ' .
-                   $tagDefinition .
-                   ', ' .
-                   json_encode( $package ) .
-                   ' ); ?> ';
-        }
-
-        if ( null !== $package && '' !== $package )
-        {
-            $tplFile = Path::Combine( $this->_config->getTemplatesFolder(), $package, $tagDefinition );
-        }
-        else
-        {
-            $tplFile = Path::Combine( $this->_config->getTemplatesFolder(), $tagDefinition );
-        }
-
-        if ( !file_exists( $tplFile ) )
-        {
-            return '<!-- PLATE-ERROR: Template ' . $tagDefinition . ' not exists! -->';
-        }
-
-        $comp = new Compiler( $this->_config );
-        $cacheFile = Path::Unixize( $comp->compile( $tagDefinition, $package ) );
-
-        return "<?php include '{$cacheFile}'; ?> ";
-
-    }
-
-    /**
-     * @param $tagDefinition
-     *
-     * @return string
-     */
-    private function extractBlock( $tagDefinition )
-    {
-
-        // if else|elseif|end for|foreach
-
-        if ( $tagDefinition == 'end' )
-        {
-            return '<?php } ?>';
-        }
-
-        if ( $tagDefinition == 'else' )
-        {
-            return '<?php } else { ?>';
-        }
-
-        $tmp = explode( ' ', $tagDefinition, 2 );
-
-        if ( count( $tmp ) !== 2 )
-        {
-            return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
-        }
-
-        if ( 'foreach' === strtolower( $tmp[ 0 ] ) )
-        {
-            // foreach from=$Varname key=key value=value
-            $attr = ArrayHelper::ParseHtmlAttributes( $tmp[ 1 ] );
-            if ( !isset( $attr[ 'from' ], $attr[ 'value' ] ) )
-            {
-                return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
-            }
-            $attr[ 'from' ] = '$' . ltrim( trim( $this->normalizeVar( $attr[ 'from' ] ) ), '$' );
-            $attr[ 'value' ] = '$' . ltrim( trim( $attr[ 'value' ] ), '$' );
-            if ( isset( $attr[ 'key' ] ) )
-            {
-                $attr[ 'key' ] = ( '$' . ltrim( trim( $attr[ 'key' ] ) ) );
-                $attr[ 'as' ] = $attr[ 'key' ] . ' => ' . $attr[ 'value' ];
-            }
-            else
-            {
-                $attr[ 'key' ] = '';
-                $attr[ 'as' ] = $attr[ 'value' ];
-            }
-
-            return "<?php foreach( {$attr['from']} as {$attr['as']} ) { ?>";
-        }
-
-        if ( 'for' === strtolower( $tmp[ 0 ] ) )
-        {
-            // for from=$array index=i count=c step=1 init=0
-            $attr = ArrayHelper::ParseHtmlAttributes( $tmp[ 1 ] );
-            if ( !isset( $attr[ 'from' ] ) )
-            {
-                return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
-            }
-            $attr[ 'from' ] = '$' . ltrim( trim( $this->normalizeVar( $attr[ 'from' ] ) ), '$' );
-            $attr[ 'index' ] = isset( $attr[ 'index' ] ) ? ( '$' . ltrim( trim( $attr[ 'index' ] ), '$' ) ) : '$i';
-            $attr[ 'count' ] = isset( $attr[ 'count' ] ) ? ( '$' . ltrim( trim( $attr[ 'count' ] ), '$' ) ) : '$c';
-            $attr[ 'step' ] = isset( $attr[ 'step' ] ) ? (int) $attr[ 'step' ] : 1;
-            $attr[ 'reverse' ] = false;
-            if ( 0 === $attr[ 'step' ] )
-            {
-                $attr[ 'step' ] = 1;
-            }
-            if ( 0 > $attr[ 'step' ] )
-            {
-                $attr[ 'step' ] = abs( $attr[ 'step' ] );
-                $attr[ 'reverse' ] = true;
-            }
-
-            if ( $attr[ 'reverse' ] )
-            {
-                // for ( $i = \count( $from ); $i > -1; $i-- ) {
-                $dec = ( 1 === $attr[ 'step' ] )
-                    ? ( $attr[ 'index' ] . '--' )
-                    : $attr[ 'index' ] . ' -= ' . $attr[ 'step' ];
-
-                return "<?php for( {$attr['index']} = count( {$attr['from']} ); {$attr['index']} > -1; {$dec} ) { ?>";
-            }
-
-            $attr[ 'init' ] = isset( $attr[ 'init' ] ) ? ( (int) $attr[ 'init' ] ) : 0;
-            // for ( $i = 0, $c = \count( $from ); $i < 0; $i++ ) {
-            $inc = ( 1 === $attr[ 'step' ] )
-                ? ( $attr[ 'index' ] . '++' )
-                : $attr[ 'index' ] . ' += ' . $attr[ 'step' ];
-
-            return "<?php for( {$attr['index']} = {$attr['init']}, {$attr['count']} = count( {$attr['from']} ); " .
-                   "{$attr['index']} < {$attr['count']}; {$inc} ) { ?>";
-        }
-
-        $tmp[ 1 ] = trim( $tmp[ 1 ] );
-
-        return "<?php {$tmp[0]} ( {$tmp[1]} ) { ?>";
-
-    }
-
-    /**
-     * @param $tagDefinition
-     *
-     * @return string
-     */
-    private function extractEnd( $tagDefinition )
-    {
-
-        // /if /for /foreach
-
-        if ( in_array( $tagDefinition, [ '/if', '/for', '/foreach', '/end' ] ) )
-        {
-            return '<?php } ?>';
-        }
-
-        return $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars();
-
-    }
-
-    /**
-     * @param string $varDefinition
-     *
-     * @return string
-     */
-    private function normalizeVar( string $varDefinition ): string
-    {
-
-        $parts = preg_split( '~([."\'-])~', $varDefinition, -1, PREG_SPLIT_DELIM_CAPTURE );
-
-        $partsCount = count( $parts );
-
-        if ( 2 > $partsCount )
-        {
-            return $varDefinition;
-        }
-
-        $tmp = [];
-
-        for ( $i = 0, $j = 0; $i < $partsCount; $i += 2 )
-        {
-
-            if ( $i === 0 )
-            {
-                $tmp[] = [ 'operator' => false, 'parts' => [ trim( $parts[ $i ] ) ] ];
-                continue;
-            }
-
-            switch ( $parts[ $i - 1 ] )
-            {
-
-                case '.':
-                    if ( '.' === $tmp[ $j ][ 'operator' ] )
-                    {
-                        $tmp[ $j ][ 'parts' ][] = trim( $parts[ $i ] );
-                        break;
-                    }
-                    if ( '"' === $tmp[ $j ][ 'operator' ] || '\'' === $tmp[ $j ][ 'operator' ] )
-                    {
-                        $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
-                        $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
-                        break;
-                    }
-                    $j++;
-                    $tmp[] = [ 'operator' => '.', 'parts' => [ trim( $parts[ $i ] ) ] ];
-                    break;
-
-                case '-':
-                    if ( false === $tmp[ $j ][ 'operator' ] )
-                    {
-                        $tmp[ $j ][ 'parts' ][] = trim( $parts[ $i - 1 ] );
-                        $tmp[ $j ][ 'parts' ][] = trim( $parts[ $i ] );
-                        break;
-                    }
-                    if ( '"' === $tmp[ $j ][ 'operator' ] || '\'' === $tmp[ $j ][ 'operator' ] )
-                    {
-                        $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
-                        $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
-                        break;
-                    }
-                    $j++;
-                    $tmp[] = [ 'operator' => false, 'parts' => [ trim( $parts[ $i - 1 ] ) ] ];
-                    $tmp[ $j ][ 'parts' ][] = trim( $parts[ $i ] );
-                    break;
-
-                case '"':
-                    if ( '"' === $tmp[ $j ][ 'operator' ] )
-                    {
-                        // Current " maybe close the open string "…
-                        if ( $this->strEndsWithEscapeChar( $tmp[ $j ][ 'parts' ][ count( $tmp[ $j ][ 'parts' ] ) - 1 ] ) )
-                        {
-                            // The " is escaped
-                            $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
-                            $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
-                            break;
-                        }
-                        // Current " closes the open string "…
-                        $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
-                        $tmp[ $j ][ 'operator' ] = false;
-                        $j++;
-                        $tmp[] = [ 'operator' => false, 'parts' => [ trim( $parts[ $i ] ) ] ];
-                        break;
-                    }
-                    // Current " opens a new string
-                    $j++;
-                    $tmp[] = [ 'operator' => '"', 'parts' => [ $parts[ $i - 1 ], $parts[ $i ] ] ];
-                    break;
-
-                case '\'':
-                    if ( '\'' === $tmp[ $j ][ 'operator' ] )
-                    {
-                        // Current ' maybe close the open string '…
-                        if ( $this->strEndsWithEscapeChar( $tmp[ $j ][ 'parts' ][ count( $tmp[ $j ][ 'parts' ] ) - 1 ] ) )
-                        {
-                            // The ' is escaped
-                            $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
-                            $tmp[ $j ][ 'parts' ][] = $parts[ $i ];
-                            break;
-                        }
-                        // Current ' close the open string '…
-                        $tmp[ $j ][ 'parts' ][] = $parts[ $i - 1 ];
-                        $tmp[ $j ][ 'operator' ] = false;
-                        $j++;
-                        $tmp[] = [ 'operator' => false, 'parts' => [ $parts[ $i ] ] ];
-                        break;
-                    }
-                    // Current ' opens a new string
-                    $j++;
-                    $tmp[] = [ 'operator' => '\'', 'parts' => [ $parts[ $i - 1 ], $parts[ $i ] ] ];
-                    break;
-
-            }
-
-        }
-
-        $normalized = '';
-        foreach ( $tmp as $partsGroup )
-        {
-
-            if ( false === $partsGroup[ 'operator' ] )
-            {
-                $normalized .= implode( '', $partsGroup[ 'parts' ] );
-                continue;
-            }
-
-            for ( $i = 0, $c = count( $partsGroup[ 'parts' ] ); $i < $c; $i++ )
-            {
-                if ( '' !== $partsGroup[ 'parts' ][ $i ] &&
-                     ( '$' === $partsGroup[ 'parts' ][ $i ][ 0 ] || is_numeric( $partsGroup[ 'parts' ][ $i ] ) ) )
-                {
-                    continue;
-                }
-                $partsGroup[ 'parts' ][ $i ] = json_encode( $partsGroup[ 'parts' ][ $i ] );
-            }
-
-            $normalized .= '[' . implode( '][', $partsGroup[ 'parts' ] ) . ']';
-
-        }
-
-        return $normalized;
-
-    }
-
-    private function strEndsWithEscapeChar( string $str ): bool
-    {
-
-        if ( !preg_match( '~(\\\\+)$~', $str, $matches ) )
-        {
-            return false;
-        }
-        $backSlashCount = strlen( $matches[ 1 ] );
-
-        return 0 !== $backSlashCount && 0 !== ( $backSlashCount % 2 );
     }
 
     # </editor-fold>

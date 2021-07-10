@@ -13,7 +13,7 @@ declare( strict_types=1 );
 namespace Niirrty\Plate;
 
 
-use Throwable;
+use \Throwable;
 
 
 class CompileException extends PlateException

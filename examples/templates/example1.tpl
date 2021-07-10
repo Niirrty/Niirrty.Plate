@@ -1,6 +1,16 @@
-Ein Integer: {{$int}}
-Ein Float  : {{$float}}
-Ein Boolean: {{if $bool}}TRUE{{else}}FALSE{{/if}}
+{{~ MyApp::Text1}}
+
+{{~ MyApp::Text2}}
+
+{{~ MyApp::Text3=This is a unknown translation value}}
+
+Hilfe 1: {{? 1}}
+Hilfe 2: {{? 8#MyAnchor}}
+Hilfe 3: {{? 12}}
+
+{{~ MyApp::TitleInt}} {{$int}}
+{{~ MyApp::TitleFloat}} {{$float}}
+{{~ MyApp::TitleBool}} {{if $bool}}TRUE{{else}}FALSE{{/if}}
 {{+$Varname = 'Whatever 1'}}
 TPL Var    : {{$Varname}}
 {{* Single line comment *}}
@@ -19,4 +29,4 @@ Array 1
 {{if ($i % 2) === 0}}*{{else}}-{{/if}} {{$array1.$i}}
 {{/for}}
 
-Datum + Zeit: {{$datetime->format('Y-m-d H:i:s')}}
+{{~ MyApp::TitleDtm}}: {{$datetime->format($formatDtm)}}

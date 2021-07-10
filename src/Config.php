@@ -14,28 +14,11 @@ declare( strict_types=1 );
 namespace Niirrty\Plate;
 
 
-use Niirrty\ArgumentException;
-use Niirrty\IO\File;
-use Niirrty\IO\FileNotFoundException;
-use Niirrty\IO\IOException;
-use Niirrty\IO\Vfs\VfsManager;
-use SimpleXMLElement;
-use Throwable;
-use function file_get_contents;
-use function in_array;
-use function intval;
-use function is_array;
-use function is_dir;
-use function is_numeric;
-use function is_string;
-use function is_writable;
-use function json_decode;
-use function ltrim;
-use function max;
-use function min;
-use function simplexml_load_file;
-use function strtolower;
-use function trim;
+use \Niirrty\ArgumentException;
+use \Niirrty\IO\{File, FileNotFoundException, IOException};
+use \Niirrty\IO\Vfs\VfsManager;
+use \SimpleXMLElement;
+use \Throwable;
 
 
 class Config
@@ -302,7 +285,7 @@ class Config
     public function setOpenChars( string $chars ): Config
     {
 
-        if ( '' === trim( $chars ) )
+        if ( '' === \trim( $chars ) )
         {
             throw new ArgumentException(
                 'openChars', $chars, 'Can not use a empty template tag open chars string!'
@@ -328,7 +311,7 @@ class Config
     public function setCloseChars( string $chars ): Config
     {
 
-        if ( '' === trim( $chars ) )
+        if ( '' === \trim( $chars ) )
         {
             throw new ArgumentException(
                 'closeChars', $chars, 'Can not use a empty template tag close chars string!'
@@ -358,7 +341,7 @@ class Config
     public function setCacheMode( string $mode ): Config
     {
 
-        if ( !in_array( $mode, static::KNOWN_CACHE_MODES, true ) )
+        if ( !\in_array( $mode, static::KNOWN_CACHE_MODES, true ) )
         {
             throw new ArgumentException(
                 'cacheMode', $mode, 'Can not use a unknown cache mode!'
@@ -384,7 +367,7 @@ class Config
     public function setCacheCompileFolder( string $folder ): Config
     {
 
-        if ( '' === trim( $folder ) )
+        if ( '' === \trim( $folder ) )
         {
             throw new ArgumentException(
                 'cacheCompileFolder', $folder,
@@ -392,7 +375,7 @@ class Config
             );
         }
 
-        if ( !is_dir( $folder ) )
+        if ( !\is_dir( $folder ) )
         {
             throw new ArgumentException(
                 'cacheCompileFolder', $folder,
@@ -400,7 +383,7 @@ class Config
             );
         }
 
-        if ( !is_writable( $folder ) )
+        if ( !\is_writable( $folder ) )
         {
             throw new ArgumentException(
                 'cacheCompileFolder', $folder,
@@ -430,7 +413,7 @@ class Config
     public function setCacheCompileLifetime( int $lifetime ): Config
     {
 
-        $this->_data[ 'cache' ][ 'lifetime' ] = min( 2678400, max( 0, $lifetime ) );
+        $this->_data[ 'cache' ][ 'lifetime' ] = \min( 2678400, \max( 0, $lifetime ) );
 
         return $this;
 
@@ -455,29 +438,29 @@ class Config
             return $this;
         }
 
-        if ( isset( $data[ 'openChars' ] ) && is_string( $data[ 'openChars' ] ) )
+        if ( isset( $data[ 'openChars' ] ) && \is_string( $data[ 'openChars' ] ) )
         {
             $this->setOpenChars( $data[ 'openChars' ] );
         }
-        if ( isset( $data[ 'closeChars' ] ) && is_string( $data[ 'closeChars' ] ) )
+        if ( isset( $data[ 'closeChars' ] ) && \is_string( $data[ 'closeChars' ] ) )
         {
             $this->setCloseChars( $data[ 'closeChars' ] );
         }
-        if ( isset( $data[ 'templatesFolder' ] ) && is_string( $data[ 'templatesFolder' ] ) )
+        if ( isset( $data[ 'templatesFolder' ] ) && \is_string( $data[ 'templatesFolder' ] ) )
         {
             $this->setTemplatesFolder( $data[ 'templatesFolder' ] );
         }
-        if ( isset( $data[ 'cache' ] ) && is_array( $data[ 'cache' ] ) )
+        if ( isset( $data[ 'cache' ] ) && \is_array( $data[ 'cache' ] ) )
         {
-            if ( isset( $data[ 'cache' ][ 'mode' ] ) && in_array( $data[ 'cache' ][ 'mode' ], [ 'user', 'editor' ] ) )
+            if ( isset( $data[ 'cache' ][ 'mode' ] ) && \in_array( $data[ 'cache' ][ 'mode' ], [ 'user', 'editor' ] ) )
             {
                 $this->setCacheMode( $data[ 'cache' ][ 'mode' ] );
             }
-            if ( isset( $data[ 'cache' ][ 'folder' ] ) && is_string( $data[ 'cache' ][ 'folder' ] ) )
+            if ( isset( $data[ 'cache' ][ 'folder' ] ) && \is_string( $data[ 'cache' ][ 'folder' ] ) )
             {
                 $this->setCacheCompileFolder( $data[ 'cache' ][ 'folder' ] );
             }
-            if ( isset( $data[ 'cache' ][ 'lifetime' ] ) && is_numeric( $data[ 'cache' ][ 'lifetime' ] ) )
+            if ( isset( $data[ 'cache' ][ 'lifetime' ] ) && \is_numeric( $data[ 'cache' ][ 'lifetime' ] ) )
             {
                 $this->setCacheCompileLifetime( (int) $data[ 'cache' ][ 'lifetime' ] );
             }
@@ -498,7 +481,7 @@ class Config
     public function setTemplatesFolder( string $folder ): Config
     {
 
-        if ( '' === trim( $folder ) )
+        if ( '' === \trim( $folder ) )
         {
             throw new ArgumentException(
                 'templatesFolder', $folder,
@@ -506,7 +489,7 @@ class Config
             );
         }
 
-        if ( !is_dir( $folder ) )
+        if ( !\is_dir( $folder ) )
         {
             throw new ArgumentException(
                 'templatesFolder', $folder,
@@ -585,7 +568,7 @@ class Config
     public static function FromFile( string $configFile, ?VfsManager $vfsManager = null ): ?Config
     {
 
-        $ext = ltrim( strtolower( File::GetExtension( $configFile ) ), '.' );
+        $ext = \ltrim( \strtolower( File::GetExtension( $configFile ) ), '.' );
 
         switch ( $ext )
         {
@@ -669,7 +652,7 @@ class Config
             );
         }
 
-        if ( !is_array( $data ) )
+        if ( !\is_array( $data ) )
         {
             throw new ArgumentException(
                 'configFile', $configFile,
@@ -745,7 +728,7 @@ class Config
         $data = null;
         try
         {
-            $data = json_decode( file_get_contents( $configFile ), true );
+            $data = \json_decode( \file_get_contents( $configFile ), true );
         }
         catch ( Throwable $ex )
         {
@@ -757,7 +740,7 @@ class Config
             );
         }
 
-        if ( !is_array( $data ) )
+        if ( !\is_array( $data ) )
         {
             throw new ArgumentException(
                 'configFile', $configFile,
@@ -841,7 +824,7 @@ class Config
             );
         }
 
-        if ( !is_array( $data ) )
+        if ( !\is_array( $data ) )
         {
             throw new ArgumentException(
                 'configFile', $configFile,
@@ -919,7 +902,7 @@ class Config
         $xml = null;
         try
         {
-            $xml = simplexml_load_file( $configFile );
+            $xml = \simplexml_load_file( $configFile );
         }
         catch ( Throwable $ex )
         {
@@ -982,7 +965,7 @@ class Config
             return null;
         }
 
-        return strtolower( ltrim( ( File::GetExtension( $file ) ?? '' ), '.' ) );
+        return \strtolower( \ltrim( ( File::GetExtension( $file ) ?? '' ), '.' ) );
 
     }
 
@@ -1054,7 +1037,7 @@ class Config
             }
             if ( isset( $xml->cache->lifetime ) )
             {
-                $out->setCacheCompileLifetime( intval( (string) $xml->cache->lifetime ) );
+                $out->setCacheCompileLifetime( \intval( (string) $xml->cache->lifetime ) );
             }
         }
 

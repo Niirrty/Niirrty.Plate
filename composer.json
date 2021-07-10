@@ -16,7 +16,8 @@
       "niirrty/niirrty.io.vfs": "~0.3",
       "ext-json": "*",
       "ext-simplexml": "*",
-      "ext-tidy": "*"
+      "ext-tidy": "*",
+      "niirrty/niirrty.translation": "0.3.0"
    },
    "autoload": {
       "psr-4": {

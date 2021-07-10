@@ -14,9 +14,6 @@ declare( strict_types=1 );
 namespace Niirrty\Plate\Handler;
 
 
-use function class_exists;
-
-
 class XHTMLTidy implements IHandler
 {
 
@@ -98,7 +95,7 @@ class XHTMLTidy implements IHandler
     public function execute( string $contents ): string
     {
 
-        if ( !class_exists( '\\tidy' ) )
+        if ( !\class_exists( '\\tidy' ) )
         {
             return $contents;
         }

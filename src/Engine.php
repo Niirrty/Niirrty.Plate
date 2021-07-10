@@ -14,15 +14,13 @@ declare( strict_types=1 );
 namespace Niirrty\Plate;
 
 
-use ArrayAccess;
-use Niirrty\ArgumentException;
-use Niirrty\DB\DBException;
-use Niirrty\IO\Path;
-use Niirrty\Plate\Handler\IHandler;
-use function is_null;
-use function ob_end_clean;
-use function ob_get_contents;
-use function ob_start;
+use \ArrayAccess;
+use \Niirrty\ArgumentException;
+use \Niirrty\DB\DBException;
+use \Niirrty\IO\Path;
+use \Niirrty\Plate\Handler\IHandler;
+use Niirrty\Plate\TagParser\IPlateTagParser;
+use \Niirrty\Translation\Translator;
 
 
 class Engine implements ArrayAccess
@@ -38,6 +36,10 @@ class Engine implements ArrayAccess
     /** @var Config */
     protected $config;
 
+    protected $translator;
+
+    protected $userDefinedTagParser = [];
+
     // </editor-fold>
 
 
@@ -47,10 +49,12 @@ class Engine implements ArrayAccess
      * Engine constructor.
      *
      * @param Config $config
+     * @param Translator|null $translator
      */
-    public function __construct( Config $config )
+    public function __construct( Config $config, ?Translator $translator = null )
     {
 
+        $this->translator = $translator;
         $this->config = $config;
         $this->data = [
             'Engine'    => [
@@ -130,6 +134,21 @@ class Engine implements ArrayAccess
     }
 
     /**
+     * Registers a user defined template tag parser, used for compiling.
+     *
+     * @param IPlateTagParser $parser
+     * @return Engine
+     */
+    public function registerTagParser( IPlateTagParser $parser ) : Engine
+    {
+
+        $this->userDefinedTagParser[] = $parser;
+
+        return $this;
+
+    }
+
+    /**
      * @param string        $tplFile
      * @param string|null   $package
      * @param IHandler|null $handler
@@ -144,15 +163,21 @@ class Engine implements ArrayAccess
     {
 
         $compiler = new Compiler( $this->config );
+
+        foreach ( $this->userDefinedTagParser as $tagParser )
+        {
+            $compiler->registerTagParser( $tagParser );
+        }
+
         $cacheFile = $compiler->compile( $tplFile, $package );
 
-        ob_start();
+        \ob_start();
         /** @noinspection PhpIncludeInspection */
         include $cacheFile;
-        $result = ob_get_contents();
-        ob_end_clean();
+        $result = \ob_get_contents();
+        \ob_end_clean();
 
-        if ( !is_null( $handler ) )
+        if ( !\is_null( $handler ) )
         {
             return $handler->execute( $result );
         }
@@ -175,6 +200,12 @@ class Engine implements ArrayAccess
     {
 
         $compiler = new Compiler( $this->config );
+
+        foreach ( $this->userDefinedTagParser as $tagParser )
+        {
+            $compiler->registerTagParser( $tagParser );
+        }
+
         $cacheFile = $compiler->compile( $tplFile, $package );
 
         if ( null === $handler )
@@ -185,11 +216,11 @@ class Engine implements ArrayAccess
             return;
         }
 
-        ob_start();
+        \ob_start();
         /** @noinspection PhpIncludeInspection */
         include $cacheFile;
-        $result = ob_get_contents();
-        ob_end_clean();
+        $result = \ob_get_contents();
+        \ob_end_clean();
 
         echo $handler->execute( $result );
 

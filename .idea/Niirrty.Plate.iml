@@ -2,14 +2,9 @@
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/niirrty/niirrty.core" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/niirrty/niirrty.db" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/niirrty/niirrty.io" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/niirrty/niirrty.io.vfs" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/niirrty/niirrty.observer" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-ctype" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/niirrty/niirrty.locale" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/niirrty/niirrty.translation" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/psr/log" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

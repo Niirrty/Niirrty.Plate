@@ -1,4 +1,4 @@
-# The UK.Plate configuration file
+# The Niirrty.Plate configuration file
 
 If you will use the template engine in many different scripts, the best way for doing configure some equal settings,
 is to use a configuration file.

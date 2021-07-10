@@ -14,8 +14,8 @@ declare( strict_types=1 );
 namespace Niirrty\Plate;
 
 
-use Niirrty\NiirrtyException;
-use Throwable;
+use \Niirrty\NiirrtyException;
+use \Throwable;
 
 
 /**

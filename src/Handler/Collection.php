@@ -14,16 +14,10 @@ declare( strict_types=1 );
 namespace Niirrty\Plate\Handler;
 
 
-use ArrayAccess;
-use Countable;
-use Iterator;
-use Niirrty\ArgumentException;
-use function count;
-use function is_int;
-use function is_null;
+use \Niirrty\ArgumentException;
 
 
-class Collection implements IHandler, ArrayAccess, Iterator, Countable
+class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
 {
 
 
@@ -60,7 +54,7 @@ class Collection implements IHandler, ArrayAccess, Iterator, Countable
     public function execute( string $contents ): string
     {
 
-        if ( count( $this->data ) < 1 )
+        if ( \count( $this->data ) < 1 )
         {
             return $contents;
         }
@@ -109,11 +103,11 @@ class Collection implements IHandler, ArrayAccess, Iterator, Countable
             );
         }
 
-        if ( is_null( $offset ) )
+        if ( \is_null( $offset ) )
         {
             $this->data[] = $value;
         }
-        else if ( !is_int( $offset ) )
+        else if ( !\is_int( $offset ) )
         {
             $this->data[] = $value;
         }
@@ -139,36 +133,42 @@ class Collection implements IHandler, ArrayAccess, Iterator, Countable
 
         return $this->data[ $this->position ];
 
+
     }
 
     public function key()
     {
 
         return $this->position;
+
     }
 
     public function next()
     {
 
         ++$this->position;
+
     }
 
     public function rewind()
     {
 
         $this->position = 0;
+
     }
 
     public function valid()
     {
 
-        return count( $this->data ) > $this->position;
+        return \count( $this->data ) > $this->position;
+
     }
 
     public function count()
     {
 
-        return count( $this->data );
+        return \count( $this->data );
+
     }
 
 
