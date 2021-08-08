@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Niirrty
+ * @copyright  © 2017-2021, Niirrty
  * @package    Niirrty\Plate\Handler
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 
@@ -18,14 +18,14 @@ class XHTMLTidy implements IHandler
 {
 
 
-    // <editor-fold desc="// – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
-    private $config;
+    private array $config;
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –
 
     public function __construct(
         string $docType = 'strict', bool $fixUri = false, bool $indent = true, int $indentSpaces = 2 )
@@ -82,10 +82,10 @@ class XHTMLTidy implements IHandler
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
     /**
      * @param string $contents
@@ -95,7 +95,7 @@ class XHTMLTidy implements IHandler
     public function execute( string $contents ): string
     {
 
-        if ( !\class_exists( '\\tidy' ) )
+        if ( ! \class_exists( '\\tidy' ) )
         {
             return $contents;
         }
@@ -108,8 +108,7 @@ class XHTMLTidy implements IHandler
 
     }
 
-
-    // </editor-fold>
+    #endregion
 
 
 }

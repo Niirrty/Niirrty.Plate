@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.3.1
+ * @version 0.4.0
  * @since   2021-07-04
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */
@@ -20,13 +20,13 @@ class PlateTagCompiled
     #region // P R I V A T E   F I E L D S
 
     /** @var string */
-    private $_phpCode;
+    private string $_phpCode;
 
     /** @var string */
-    private $_afterTagClose;
+    private string $_afterTagClose;
 
     /** @var string */
-    private $_newLineAfter;
+    private string $_newLineAfter;
 
     #endregion
 

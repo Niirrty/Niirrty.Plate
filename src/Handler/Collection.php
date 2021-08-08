@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Niirrty
+ * @copyright  © 2017-2021, Niirrty
  * @package    Niirrty\Plate\Handler
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 
@@ -21,17 +21,16 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
 {
 
 
-    // <editor-fold desc="// – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
-    private $data;
+    private array $data;
 
-    private $position;
+    private int $position;
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
-
+    #region // – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –
 
     public function __construct()
     {
@@ -41,10 +40,10 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
     /**
      * @param string $contents
@@ -68,10 +67,16 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
 
     }
 
-    public function offsetExists( $offset )
+    /**
+     * @param mixed $offset
+     *
+     * @return bool
+     */
+    public function offsetExists( $offset ): bool
     {
 
         return isset( $this->data[ $offset ] );
+
     }
 
     /**
@@ -79,10 +84,11 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
      *
      * @return IHandler
      */
-    public function offsetGet( $offset )
+    public function offsetGet( $offset ): IHandler
     {
 
         return $this->data[ $offset ];
+
     }
 
     /**
@@ -99,7 +105,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
             throw new ArgumentException(
                 'value',
                 $value,
-                'Only values that implement \OSF\Stemp\Handler\IHandler ar valid!'
+                'Only values that implement \Niirrty\Plate\Handler\IHandler are valid!'
             );
         }
 
@@ -107,7 +113,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
         {
             $this->data[] = $value;
         }
-        else if ( !\is_int( $offset ) )
+        else if ( ! \is_int( $offset ) )
         {
             $this->data[] = $value;
         }
@@ -118,6 +124,9 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
 
     }
 
+    /**
+     * @param mixed $offset
+     */
     public function offsetUnset( $offset )
     {
 
@@ -126,17 +135,16 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * @return IHandler
+     * @return IHandler|null
      */
-    public function current()
+    public function current(): ?IHandler
     {
 
-        return $this->data[ $this->position ];
-
+        return $this->data[ $this->position ] ?? null;
 
     }
 
-    public function key()
+    public function key(): ?int
     {
 
         return $this->position;
@@ -157,22 +165,21 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
 
     }
 
-    public function valid()
+    public function valid(): bool
     {
 
         return \count( $this->data ) > $this->position;
 
     }
 
-    public function count()
+    public function count(): int
     {
 
         return \count( $this->data );
 
     }
 
-
-    // </editor-fold>
+    #endregion
 
 
 }

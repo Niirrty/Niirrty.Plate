@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.3.1
+ * @version 0.4.0
  * @since   2021-07-03
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */
@@ -14,7 +14,7 @@ namespace Niirrty\Plate\TagParser;
 
 
 use \Niirrty\Plate\Config;
-use function \Niirrty\strStartsWith;
+
 use function \Niirrty\substring;
 
 
@@ -58,8 +58,8 @@ class TranslationTagParser extends PlateTagParser
         $identifier   = \trim( $matches[ 2 ] );
         $defaultTrans = '';
         $handler      = '';
-        $isSnVar      = strStartsWith( $srcName, '$' );
-        $isIdVar      = strStartsWith( $identifier, '$' );
+        $isSnVar      = \str_starts_with( $srcName, '$' );
+        $isIdVar      = \str_starts_with( $identifier, '$' );
 
         if ( $isSnVar ) { $srcName = static::normalizeVar( \trim( $srcName ) ); }
         else            { $srcName = \json_encode( $srcName ); }
@@ -68,7 +68,7 @@ class TranslationTagParser extends PlateTagParser
         if ( ! empty( $matches[ 4 ] ) )
         {
             $defaultTrans = $matches[ 4 ];
-            $isDtVar      = strStartsWith( $defaultTrans, '$' );
+            $isDtVar      = \str_starts_with( $defaultTrans, '$' );
             if ( $isDtVar ) { $defaultTrans = static::normalizeVar( \trim( $defaultTrans ) ); }
             else            { $defaultTrans = \json_encode( $defaultTrans ); }
         }

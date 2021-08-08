@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.3.1
+ * @version 0.4.0
  * @since   2021-07-03
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */
@@ -39,7 +39,7 @@ class VarInTagParser extends PlateTagParser
         string $tagDefinition, string $afterTagClose = '', string $newLineAfter = '', ?string $package = null  ) : bool
     {
 
-        if ( $this->_identifier != $tagDefinition[ 0 ] || ! isset( $tagDefinition[ 1 ] ) || '$' != $tagDefinition[ 1 ] )
+        if ( $this->identifier != $tagDefinition[ 0 ] || ! isset( $tagDefinition[ 1 ] ) || '$' != $tagDefinition[ 1 ] )
         {
             return false;
         }

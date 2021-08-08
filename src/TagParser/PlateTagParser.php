@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.3.1
+ * @version 0.4.0
  * @since   2021-07-03
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */
@@ -23,55 +23,49 @@ abstract class PlateTagParser implements IPlateTagParser
     #region // P R O T E C T E D   F I E L D S
 
     /**
-     * The tag identifier character (only a single character is accepted)
-     *
-     * @var mixed
-     */
-    protected $_identifier;
-
-    /**
      * Defines if a check for identifier ($this->hasIdentifier()) should be called automatic.
      *
      * @var bool
      */
-    protected $_autoIdentify;
+    protected bool $_autoIdentify;
 
     /**
      * All parts of the tag, excluding open chars, close chars, and identifier
      *
      * @var array
      */
-    protected $_data;
+    protected array $_data;
 
     /**
      * The names of the filters.
      *
      * @var array
      */
-    protected $_filter;
+    protected array $_filter;
 
     /**
      * @var PlateTagCompiled|null
      */
-    protected $_compiled;
-
-    /** @var Config */
-    protected $_config;
+    protected ?PlateTagCompiled $_compiled;
 
     #endregion
 
 
     #region // C O N S T R U C T O R
 
-    protected function __construct( string $identifier, Config $config )
+    /**
+     * PlateTagParser constructor.
+     *
+     * @param string $identifier The tag identifier character (only a single character is accepted)
+     * @param Config $config
+     */
+    protected function __construct( protected string $identifier, protected Config $config )
     {
 
         $this->_autoIdentify = true;
-        $this->_identifier = $identifier;
         $this->_data = [];
         $this->_filter = [];
         $this->_compiled = null;
-        $this->_config = $config;
 
     }
 
@@ -84,7 +78,7 @@ abstract class PlateTagParser implements IPlateTagParser
     public function getIdentifier() : string
     {
 
-        return $this->_identifier;
+        return $this->identifier;
 
     }
 
@@ -128,7 +122,7 @@ abstract class PlateTagParser implements IPlateTagParser
 
         if ( $this->_autoIdentify )
         {
-            if ( $this->_identifier != $tagDefinition[ 0 ] )
+            if ( $this->identifier != $tagDefinition[ 0 ] )
             {
                 return false;
             }
@@ -346,7 +340,7 @@ abstract class PlateTagParser implements IPlateTagParser
     protected function hasIdentifier( string $tagDefinition ) : bool
     {
 
-        return $this->_identifier === \substr( $tagDefinition, 0, \strlen( $this->_identifier ) );
+        return \str_starts_with( $tagDefinition, $this->identifier );
 
     }
 

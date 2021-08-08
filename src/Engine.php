@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Ni Irrty
+ * @copyright  © 2017-2021, Ni Irrty
  * @package    Niirrty\Plate
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 
@@ -14,36 +14,30 @@ declare( strict_types=1 );
 namespace Niirrty\Plate;
 
 
-use \ArrayAccess;
 use \Niirrty\ArgumentException;
 use \Niirrty\DB\DBException;
 use \Niirrty\IO\Path;
 use \Niirrty\Plate\Handler\IHandler;
-use Niirrty\Plate\TagParser\IPlateTagParser;
+use \Niirrty\Plate\TagParser\IPlateTagParser;
 use \Niirrty\Translation\Translator;
 
 
-class Engine implements ArrayAccess
+class Engine implements \ArrayAccess
 {
 
 
-    // <editor-fold desc="// – – –   P R O T E C T E D   F I E L D S   – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P R O T E C T E D   F I E L D S   – – – – – – – – – – – – – – – – – – – – – –
 
 
     /** @var array */
-    protected $data;
+    protected array $data;
 
-    /** @var Config */
-    protected $config;
+    protected array $userDefinedTagParser = [];
 
-    protected $translator;
-
-    protected $userDefinedTagParser = [];
-
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –
 
     /**
      * Engine constructor.
@@ -51,11 +45,9 @@ class Engine implements ArrayAccess
      * @param Config $config
      * @param Translator|null $translator
      */
-    public function __construct( Config $config, ?Translator $translator = null )
+    public function __construct( protected Config $config, protected ?Translator $translator = null )
     {
 
-        $this->translator = $translator;
-        $this->config = $config;
         $this->data = [
             'Engine'    => [
                 'Version' => '0.1.0',
@@ -66,10 +58,10 @@ class Engine implements ArrayAccess
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
     public function __get( $name )
     {
@@ -226,12 +218,12 @@ class Engine implements ArrayAccess
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// - - - ArrayAccess Implementation - - - - - - - - - - - - - - - - - - - - - -">
+    #region // - - - ArrayAccess Implementation - - - - - - - - - - - - - - - - - - - - - -
 
-    public function offsetExists( $offset )
+    public function offsetExists( $offset ): bool
     {
 
         return isset ( $this->data[ $offset ] );
@@ -255,7 +247,7 @@ class Engine implements ArrayAccess
         unset ( $this->data[ $offset ] );
     }
 
-    // </editor-fold>
+    #endregion
 
     /**
      * @param string      $templateFile

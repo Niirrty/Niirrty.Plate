@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.3.1
+ * @version 0.4.0
  * @since   2021-07-03
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */
@@ -37,6 +37,12 @@ class IncludeTagParser extends PlateTagParser
 
     #region // P U B L I C   M E T H O D S
 
+    /**
+     * @throws \Throwable
+     * @throws \Niirrty\ArgumentException
+     * @throws \Niirrty\Plate\CompileException
+     * @throws \Niirrty\DB\DBException
+     */
     protected function _parse(
         string $tagDefinition, string $afterTagClose = '', string $newLineAfter = '', ?string $package = null  ) : bool
     {
@@ -52,11 +58,11 @@ class IncludeTagParser extends PlateTagParser
         {
 
             $this->_compiled = ( new PlateTagCompiled() )
-                ->setPhpCode( '<?php $this->includeWithCaching( ' .
+                ->setPhpCode( '<' . '?php $this->includeWithCaching( ' .
                               $tagDefinition .
                               ', ' .
                               \json_encode( $package ) .
-                              ' ); ?> ' )
+                              ' ); ?' . '> ' )
                 ->setNewLineAfter( "" )
                 ->setAfterTagClose( $afterTagClose );
 
@@ -66,11 +72,11 @@ class IncludeTagParser extends PlateTagParser
 
         if ( null !== $package && '' !== $package )
         {
-            $tplFile = Path::Combine( $this->_config->getTemplatesFolder(), $package, $tagDefinition );
+            $tplFile = Path::Combine( $this->config->getTemplatesFolder(), $package, $tagDefinition );
         }
         else
         {
-            $tplFile = Path::Combine( $this->_config->getTemplatesFolder(), $tagDefinition );
+            $tplFile = Path::Combine( $this->config->getTemplatesFolder(), $tagDefinition );
         }
 
         if ( ! \file_exists( $tplFile ) )
@@ -85,11 +91,11 @@ class IncludeTagParser extends PlateTagParser
 
         }
 
-        $comp      = new Compiler( $this->_config );
+        $comp      = new Compiler( $this->config );
         $cacheFile = Path::Unixize( $comp->compile( $tagDefinition, $package ) );
 
         $this->_compiled = ( new PlateTagCompiled() )
-            ->setPhpCode( "<?php include '{$cacheFile}'; ?> " )
+            ->setPhpCode( "<" . "?php include '{$cacheFile}'; ?> " )
             ->setNewLineAfter( "" )
             ->setAfterTagClose( $afterTagClose );
 

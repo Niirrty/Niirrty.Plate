@@ -7,7 +7,7 @@ include __DIR__ . '/MyHelpTagParser.php';
 use Niirrty\IO\Vfs\VfsManager;
 
 
-$locale = \Niirrty\Locale\Locale::Create( new \Niirrty\Locale\Locale( 'de', null, 'utf-8' ) );
+$locale = \Niirrty\Locale\Locale::Create( new \Niirrty\Locale\Locale( 'de', '', 'utf-8' ) );
 $tplVfs = \Niirrty\IO\Vfs\VfsHandler::Create(
     'Templates root folder', 'tpl', '://', __DIR__ . DIRECTORY_SEPARATOR . 'templates' );
 $cacheVfs = \Niirrty\IO\Vfs\VfsHandler::Create(

@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Niirrty
+ * @copyright  © 2017-2021, Niirrty
  * @package    Niirrty\Plate\Handler
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 
@@ -14,42 +14,28 @@ declare( strict_types=1 );
 namespace Niirrty\Plate\Handler;
 
 
+/**
+ * Class SmileyReplacer
+ *
+ * @package Niirrty\Plate\Handler
+ */
 class SmileyReplacer implements IHandler
 {
 
 
-    // <editor-fold desc="// – – –   P R O T E C T E D   F I E L D S   – – – – – – – – – – – – – – – – – – – – – –">
-
-
-    /**
-     * Smiley as key and image file url as value.
-     *
-     * @var array
-     */
-    protected $replacements;
-
-    // </editor-fold>
-
-
-    // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
-
+    #region // – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –
 
     /**
      * SmileyReplacer constructor.
      *
      * @param array $replacements Smiley as key and image file url as value.
      */
-    public function __construct( array $replacements )
-    {
+    public function __construct( protected array $replacements ) { }
 
-        $this->replacements = $replacements;
-
-    }
-
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
     /**
      * @param string $contents
@@ -76,8 +62,7 @@ class SmileyReplacer implements IHandler
 
     }
 
-
-    // </editor-fold>
+    #endregion
 
 
 }

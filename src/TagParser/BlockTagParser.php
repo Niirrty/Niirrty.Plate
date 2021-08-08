@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.3.1
+ * @version 0.4.0
  * @since   2021-07-03
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */
@@ -48,7 +48,7 @@ class BlockTagParser extends PlateTagParser
         if ( 'end' === $tagDefinition )
         {
             $this->_compiled = ( new PlateTagCompiled() )
-                ->setPhpCode( '<?php } ?>' )
+                ->setPhpCode( '<'.'?php } ?>' )
                 ->setNewLineAfter( " \n" )
                 ->setAfterTagClose( $afterTagClose );
             return true;
@@ -57,7 +57,7 @@ class BlockTagParser extends PlateTagParser
         if ( $tagDefinition == 'else' )
         {
             $this->_compiled = ( new PlateTagCompiled() )
-                ->setPhpCode( '<?php } else { ?>' )
+                ->setPhpCode( '<' . '?php } else { ?>' )
                 ->setNewLineAfter( " \n" )
                 ->setAfterTagClose( $afterTagClose );
             return true;
@@ -68,7 +68,7 @@ class BlockTagParser extends PlateTagParser
         if ( 2 !== \count( $tmp ) )
         {
             $this->_compiled = ( new PlateTagCompiled() )
-                ->setPhpCode( $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars() )
+                ->setPhpCode( $this->config->getOpenChars() . $tagDefinition . $this->config->getCloseChars() )
                 ->setAfterTagClose( $afterTagClose );
             return true;
         }
@@ -80,7 +80,7 @@ class BlockTagParser extends PlateTagParser
             if ( !isset( $attr[ 'from' ], $attr[ 'value' ] ) )
             {
                 $this->_compiled = ( new PlateTagCompiled() )
-                    ->setPhpCode( $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars() )
+                    ->setPhpCode( $this->config->getOpenChars() . $tagDefinition . $this->config->getCloseChars() )
                     ->setAfterTagClose( $afterTagClose );
                 return true;
             }
@@ -109,7 +109,7 @@ class BlockTagParser extends PlateTagParser
             if ( !isset( $attr[ 'from' ] ) )
             {
                 $this->_compiled = ( new PlateTagCompiled() )
-                    ->setPhpCode( $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars() )
+                    ->setPhpCode( $this->config->getOpenChars() . $tagDefinition . $this->config->getCloseChars() )
                     ->setAfterTagClose( $afterTagClose );
                 return true;
             }
@@ -136,7 +136,7 @@ class BlockTagParser extends PlateTagParser
                     : $attr[ 'index' ] . ' -= ' . $attr[ 'step' ];
                 $this->_compiled = ( new PlateTagCompiled() )
                     ->setPhpCode(
-                        "<?php for( {$attr['index']} = count( {$attr['from']} ); {$attr['index']} > -1; {$dec} ) { ?>" )
+                        "<" . "?php for( {$attr['index']} = count( {$attr['from']} ); {$attr['index']} > -1; {$dec} ) { ?" . ">" )
                     ->setAfterTagClose( $afterTagClose );
                 return true;
             }
@@ -148,7 +148,7 @@ class BlockTagParser extends PlateTagParser
                 : $attr[ 'index' ] . ' += ' . $attr[ 'step' ];
             $this->_compiled = ( new PlateTagCompiled() )
                 ->setPhpCode(
-                    "<?php for( {$attr['index']} = {$attr['init']}, {$attr['count']} = count( {$attr['from']} ); " .
+                    "<" . "?php for( {$attr['index']} = {$attr['init']}, {$attr['count']} = count( {$attr['from']} ); " .
                     "{$attr['index']} < {$attr['count']}; {$inc} ) { ?>" )
                 ->setAfterTagClose( $afterTagClose );
             return true;
@@ -156,7 +156,7 @@ class BlockTagParser extends PlateTagParser
 
         $tmp[ 1 ] = \trim( $tmp[ 1 ] );
         $this->_compiled = ( new PlateTagCompiled() )
-            ->setPhpCode( "<?php {$tmp[0]} ( {$tmp[1]} ) { ?>" )
+            ->setPhpCode( "<" . "?php {$tmp[0]} ( {$tmp[1]} ) { ?>" )
             ->setAfterTagClose( $afterTagClose );
         return true;
 

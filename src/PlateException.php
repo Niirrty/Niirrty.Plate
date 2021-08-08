@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Ni Irrty
+ * @copyright  © 2017-2021, Ni Irrty
  * @package    Niirrty\Plate
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 
@@ -15,7 +15,6 @@ namespace Niirrty\Plate;
 
 
 use \Niirrty\NiirrtyException;
-use \Throwable;
 
 
 /**
@@ -27,7 +26,7 @@ class PlateException extends NiirrtyException
 {
 
 
-    // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –
 
 
     /**
@@ -35,9 +34,9 @@ class PlateException extends NiirrtyException
      *
      * @param string          $message
      * @param int             $code
-     * @param Throwable|null $previous
+     * @param \Throwable|null $previous
      */
-    public function __construct( string $message, int $code = 256, Throwable $previous = null )
+    public function __construct( string $message, int $code = 256, ?\Throwable $previous = null )
     {
 
         parent::__construct( $message, $code, $previous );
@@ -45,7 +44,7 @@ class PlateException extends NiirrtyException
     }
 
 
-    // </editor-fold>
+    #endregion
 
 
 }

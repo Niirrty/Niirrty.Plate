@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Ni Irrty
+ * @copyright  © 2017-2021, Ni Irrty
  * @package    Niirrty\Plate
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 
@@ -25,39 +25,26 @@ class Config
 {
 
 
-    // <editor-fold desc="// – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
-
-    /**
-     * The config data.
-     *
-     * @var array
-     */
-    private $_data = null;
-
-    /**
-     * Path of the loaded config file.
-     *
-     * @var null|string
-     */
-    private $_file;
+    private ?array $data;
 
     /**
      * The config file type. (see FILE_TYPE_* class constants)
      *
      * @var null|string
      */
-    private $_type;
+    private ?string $_type;
 
     /**
      * @var Config|null
      */
-    private static $_instance = null;
+    private static ?Config $_instance = null;
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   C O N S T A N T S   – – – – – – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   C O N S T A N T S   – – – – – – – – – – – – – – – – – – – – – – – – – – – – –
 
     /**
      * The default settings
@@ -115,35 +102,34 @@ class Config
      */
     public const KNOWN_CACHE_MODES = [ self::CACHE_MODE_USER, self::CACHE_MODE_EDITOR ];
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –
 
     /**
      * Initialize a new \Niirrty\Plate\Config instance.
      *
-     * @param array       $data The config data array. NULL also means => use the DEFAULTS
-     * @param null|string $file If a file was used to get the data, define it here.
+     * @param array|null  $data The config data array. NULL also means => use the DEFAULTS
+     * @param null|string $file Path of the loaded config file. If a file was used to get the data, define it here.
      *
      * @throws ArgumentException
      */
-    public function __construct( ?array $data = self::DEFAULTS, ?string $file = null )
+    public function __construct( ?array $data = self::DEFAULTS, private ?string $file = null )
     {
-
+        $this->data = null;
         $this->setData( $data );
-        $this->_file = $file;
         $this->_type = static::_getFileType( $file );
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
 
-    // <editor-fold desc="// * * * * * *   G E T T E R   * * * * * *">
+    #region // * * * * * *   G E T T E R   * * * * * *
 
     /**
      * Gets the config data.
@@ -153,7 +139,7 @@ class Config
     public function getData(): array
     {
 
-        return $this->_data;
+        return $this->data;
 
     }
 
@@ -165,7 +151,7 @@ class Config
     public function getFile(): ?string
     {
 
-        return $this->_file;
+        return $this->file;
 
     }
 
@@ -189,7 +175,7 @@ class Config
     public function getTemplatesFolder(): ?string
     {
 
-        return $this->_data[ 'templatesFolder' ];
+        return $this->data[ 'templatesFolder' ];
 
     }
 
@@ -201,7 +187,7 @@ class Config
     public function getOpenChars(): string
     {
 
-        return $this->_data[ 'openChars' ];
+        return $this->data[ 'openChars' ];
 
     }
 
@@ -213,7 +199,7 @@ class Config
     public function getCloseChars(): string
     {
 
-        return $this->_data[ 'closeChars' ];
+        return $this->data[ 'closeChars' ];
 
     }
 
@@ -231,7 +217,7 @@ class Config
     public function getCacheMode(): string
     {
 
-        return $this->_data[ 'cache' ][ 'mode' ];
+        return $this->data[ 'cache' ][ 'mode' ];
 
     }
 
@@ -245,7 +231,7 @@ class Config
     public function getCacheCompileFolder(): string
     {
 
-        return $this->_data[ 'cache' ][ 'folder' ];
+        return $this->data[ 'cache' ][ 'folder' ];
 
     }
 
@@ -263,14 +249,14 @@ class Config
     public function getCacheCompileLifetime(): int
     {
 
-        return $this->_data[ 'cache' ][ 'lifetime' ];
+        return $this->data[ 'cache' ][ 'lifetime' ];
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// * * * * * *   S E T T E R   * * * * * *">
+    #region // * * * * * *   S E T T E R   * * * * * *
 
     /**
      * Sets the template tag start character sequence. The default value is `{`.
@@ -292,7 +278,7 @@ class Config
             );
         }
 
-        $this->_data[ 'openChars' ] = $chars;
+        $this->data[ 'openChars' ] = $chars;
 
         return $this;
 
@@ -318,7 +304,7 @@ class Config
             );
         }
 
-        $this->_data[ 'closeChars' ] = $chars;
+        $this->data[ 'closeChars' ] = $chars;
 
         return $this;
 
@@ -348,7 +334,7 @@ class Config
             );
         }
 
-        $this->_data[ 'cache' ][ 'mode' ] = $mode;
+        $this->data[ 'cache' ][ 'mode' ] = $mode;
 
         return $this;
 
@@ -391,7 +377,7 @@ class Config
             );
         }
 
-        $this->_data[ 'cache' ][ 'folder' ] = $folder;
+        $this->data[ 'cache' ][ 'folder' ] = $folder;
 
         return $this;
 
@@ -413,7 +399,7 @@ class Config
     public function setCacheCompileLifetime( int $lifetime ): Config
     {
 
-        $this->_data[ 'cache' ][ 'lifetime' ] = \min( 2678400, \max( 0, $lifetime ) );
+        $this->data[ 'cache' ][ 'lifetime' ] = \min( 2678400, \max( 0, $lifetime ) );
 
         return $this;
 
@@ -428,9 +414,9 @@ class Config
     public function setData( ?array $data ): Config
     {
 
-        if ( null === $this->_data || null === $data )
+        if ( null === $this->data || null === $data )
         {
-            $this->_data = static::DEFAULTS;
+            $this->data = static::DEFAULTS;
         }
 
         if ( null === $data )
@@ -473,7 +459,7 @@ class Config
     /**
      * Sets the templates folder.
      *
-     * @param string|null $folder
+     * @param string $folder
      *
      * @return Config
      * @throws ArgumentException
@@ -497,13 +483,13 @@ class Config
             );
         }
 
-        $this->_data[ 'templatesFolder' ] = $folder;
+        $this->data[ 'templatesFolder' ] = $folder;
 
         return $this;
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
     /**
@@ -538,21 +524,21 @@ class Config
     public function toArray(): array
     {
 
-        return $this->_data;
+        return $this->data;
 
     }
 
     public function isValid(): bool
     {
 
-        return $this->canUseCompilerCache() && null !== $this->_data[ 'templatesFolder' ];
+        return $this->canUseCompilerCache() && null !== $this->data[ 'templatesFolder' ];
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P U B L I C   S T A T I C   M E T H O D S   – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   S T A T I C   M E T H O D S   – – – – – – – – – – – – – – – – –
 
     /**
      * Creates a config instance from defined config file.
@@ -636,7 +622,6 @@ class Config
             throw new IOException( $configFile, 'Invalid file name extension!' );
         }
 
-        $data = null;
         try
         {
             /** @noinspection PhpIncludeInspection */
@@ -652,7 +637,7 @@ class Config
             );
         }
 
-        if ( !\is_array( $data ) )
+        if ( ! isset( $data ) || ! \is_array( $data ) )
         {
             throw new ArgumentException(
                 'configFile', $configFile,
@@ -715,17 +700,16 @@ class Config
             $configFile = $vfsManager->parsePath( $configFile );
         }
 
-        if ( !file_exists( $configFile ) )
+        if ( ! \file_exists( $configFile ) )
         {
             throw new FileNotFoundException( $configFile, 'Can not load template engine config!' );
         }
 
-        if ( !empty( $requiredExtension ) && $requiredExtension !== static::_getFileType( $configFile ) )
+        if ( ! empty( $requiredExtension ) && $requiredExtension !== static::_getFileType( $configFile ) )
         {
             throw new IOException( $configFile, 'Invalid file name extension!' );
         }
 
-        $data = null;
         try
         {
             $data = \json_decode( \file_get_contents( $configFile ), true );
@@ -740,7 +724,7 @@ class Config
             );
         }
 
-        if ( !\is_array( $data ) )
+        if ( ! isset( $data ) || ! \is_array( $data ) )
         {
             throw new ArgumentException(
                 'configFile', $configFile,
@@ -809,7 +793,6 @@ class Config
             throw new IOException( $configFile, 'Invalid file name extension!' );
         }
 
-        $data = null;
         try
         {
             $data = parse_ini_file( $configFile, false, INI_SCANNER_TYPED );
@@ -824,7 +807,7 @@ class Config
             );
         }
 
-        if ( !\is_array( $data ) )
+        if ( ! isset( $data ) || ! \is_array( $data ) )
         {
             throw new ArgumentException(
                 'configFile', $configFile,
@@ -846,7 +829,7 @@ class Config
 
         $config = static::_convertIniArrayToConfig( $data );
         $config->_type = Config::FILE_TYPE_INI;
-        $config->_file = $configFile;
+        $config->file = $configFile;
 
         return $config;
 
@@ -889,17 +872,16 @@ class Config
             $configFile = $vfsManager->parsePath( $configFile );
         }
 
-        if ( !file_exists( $configFile ) )
+        if ( ! \file_exists( $configFile ) )
         {
             throw new FileNotFoundException( $configFile, 'Can not load template engine config!' );
         }
 
-        if ( !empty( $requiredExtension ) && $requiredExtension !== static::_getFileType( $configFile ) )
+        if ( ! empty( $requiredExtension ) && $requiredExtension !== static::_getFileType( $configFile ) )
         {
             throw new IOException( $configFile, 'Invalid file name extension!' );
         }
 
-        $xml = null;
         try
         {
             $xml = \simplexml_load_file( $configFile );
@@ -914,7 +896,7 @@ class Config
             );
         }
 
-        if ( !( $xml instanceof SimpleXMLElement ) )
+        if ( ! isset( $xml ) || ! ( $xml instanceof SimpleXMLElement ) )
         {
             throw new ArgumentException(
                 'configFile', $configFile,
@@ -924,7 +906,7 @@ class Config
 
         $config = static::_convertXMLToConfig( $xml, $vfsManager );
         $config->_type = Config::FILE_TYPE_XML;
-        $config->_file = $configFile;
+        $config->file = $configFile;
 
         return $config;
 
@@ -947,10 +929,10 @@ class Config
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   P R I V A T E   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P R I V A T E   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – –
 
     /**
      * @param string|null $file
@@ -1046,7 +1028,7 @@ class Config
     }
 
 
-    // </editor-fold>
+    #endregion
 
 
 }

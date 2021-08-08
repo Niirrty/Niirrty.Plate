@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Ni Irrty
+ * @copyright  © 2017-2021, Ni Irrty
  * @package    Niirrty\Plate
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 declare( strict_types=1 );
@@ -13,25 +13,11 @@ declare( strict_types=1 );
 namespace Niirrty\Plate;
 
 
-use \Throwable;
-
-
 class CompileException extends PlateException
 {
 
 
-    // <editor-fold desc="// – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –">
-
-
-    /**
-     * @type string
-     */
-    private $_tplFile;
-
-    // </editor-fold>
-
-
-    // <editor-fold desc="// – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P U B L I C   C O N S T R U C T O R   – – – – – – – – – – – – – – – – – – – –
 
     /**
      * Initialize a new \Niirrty\Plate\CompileException instance.
@@ -39,9 +25,9 @@ class CompileException extends PlateException
      * @param string          $templateFile
      * @param string          $message
      * @param int             $code
-     * @param Throwable|null $previous
+     * @param \Throwable|null $previous
      */
-    public function __construct( string $templateFile, string $message, int $code = 256, Throwable $previous = null )
+    public function __construct( private string $templateFile, string $message, int $code = 256, ?\Throwable $previous = null )
     {
 
         parent::__construct(
@@ -50,13 +36,12 @@ class CompileException extends PlateException
             $previous
         );
 
-        $this->_tplFile = $templateFile;
-
     }
 
-    // </editor-fold>
+    #endregion
 
-    // <editor-fold desc="// – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+
+    #region // – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
     /**
      * @return string
@@ -64,12 +49,12 @@ class CompileException extends PlateException
     public function getTemplateFile(): string
     {
 
-        return $this->_tplFile;
+        return $this->templateFile;
 
     }
 
 
-    // </editor-fold>
+    #endregion
 
 
 }

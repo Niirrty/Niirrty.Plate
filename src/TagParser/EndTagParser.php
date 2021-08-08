@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.3.1
+ * @version 0.4.0
  * @since   2021-07-03
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */
@@ -42,14 +42,14 @@ class EndTagParser extends PlateTagParser
         if ( \in_array( $tagDefinition, [ '/if', '/for', '/foreach', '/end' ] ) )
         {
             $this->_compiled = ( new PlateTagCompiled() )
-                ->setPhpCode( '<?php } ?>' )
+                ->setPhpCode( '<' . '?php } ?>' )
                 ->setNewLineAfter( " \n" )
                 ->setAfterTagClose( $afterTagClose );
             return true;
         }
 
         $this->_compiled = ( new PlateTagCompiled() )
-            ->setPhpCode( $this->_config->getOpenChars() . $tagDefinition . $this->_config->getCloseChars() )
+            ->setPhpCode( $this->config->getOpenChars() . $tagDefinition . $this->config->getCloseChars() )
             ->setAfterTagClose( $afterTagClose );
         return true;
 

@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2020, Ni Irrty
+ * @copyright  © 2017-2021, Ni Irrty
  * @package    Niirrty\Plate
  * @since      2017-11-04
- * @version    0.3.0
+ * @version    0.4.0
  */
 
 
@@ -20,7 +20,7 @@ use \Niirrty\IO\{Folder, Path};
 use \Niirrty\Plate\TagParser\{
     BlockTagParser, EndTagParser, IncludeTagParser, IPlateTagParser, TranslationTagParser, VarInTagParser, VarOutTagParser
 };
-use function \Niirrty\{strContains, strEndsWith, substring};
+use function \Niirrty\{substring};
 
 
 /**
@@ -30,33 +30,26 @@ class Compiler
 {
 
 
-    // <editor-fold desc="// – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –">
+    #region // – – –   P R I V A T E   F I E L D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
+    private Config $_config;
 
-    /**
-     * @var Config
-     */
-    private $_config;
-
-    /**
-     * @type Connection
-     */
-    private $_cacheDB;
+    private Connection $_cacheDB;
 
     /**
      * @type Connection[]
      */
-    private static $_cacheDBs = [];
+    private static array $_cacheDBs = [];
 
     /**
      * @var IPlateTagParser[]|array
      */
-    private $_tagParser;
+    private array $_tagParser;
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// – – –   C O N S T R U C T O R   - - - - - - - - - - - - - - - - - - - - - - - - - - -">
+    #region // – – –   C O N S T R U C T O R   - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     /**
      * Compiler constructor.
@@ -90,22 +83,23 @@ class Compiler
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// - - -   P U B L I C   M E T H O D S   - - - - - - - - - - - - - - - - - - - - - - - -">
+    #region // - - -   P U B L I C   M E T H O D S   - - - - - - - - - - - - - - - - - - - - - - - -
 
     /**
      * Compiles the template file.
      *
      * @param string      $tplFile The template file that should be compiled
      * @param string|null $package Optional package name. Is used as sub folder inside the template folder
+     *
      * @return string              Return the full path of the compiled php file.
      * @throws CompileException
      * @throws \Throwable
      * @throws DBException
      */
-    public function compile( $tplFile, ?string $package = null ): string
+    public function compile( string $tplFile, ?string $package = null ): string
     {
 
         if ( null !== $package && '' !== $package )
@@ -252,10 +246,10 @@ class Compiler
 
     }
 
-    // </editor-fold>
+    #endregion
 
 
-    // <editor-fold desc="// - - -   P R I V A T E   M E T H O D S   - - - - - - - - - - - - - - - - - - - - - - -">
+    #region // - - -   P R I V A T E   M E T H O D S   - - - - - - - - - - - - - - - - - - - - - - -
 
     /**
      * @param string      $tplFilePath
@@ -278,7 +272,7 @@ class Compiler
             $isCommentOpen = false;
 
             $w = \fopen( $compiledFile, 'wb' );
-            \fwrite( $w, "<?php if ( ! isset( \$____plate ) ) { extract( \$this->data ); \$hasTranslator = null !== \$this->translator; } ?>\n" );
+            \fwrite( $w, "<" . "?php if ( ! isset( \$____plate ) ) { extract( \$this->data ); \$hasTranslator = null !== \$this->translator; } ?>\n" );
             $lines = \file( $tplFilePath );
 
             foreach ( $lines as $l )
@@ -310,7 +304,7 @@ class Compiler
                         // Remember the new state
                         $isCommentOpen = false;
                         // Extract all after the comment
-                        $line = strEndsWith( $line, '*' . $closeChars )
+                        $line = \str_ends_with( $line, '*' . $closeChars )
                             ? ''
                             : substring( $line, $idx + 1 + $closeLen );
                         if ( strlen( $line ) < 1 )
@@ -477,7 +471,7 @@ class Compiler
 
     }
 
-    # </editor-fold>
+    #endregion
 
 
     /**
@@ -496,12 +490,12 @@ class Compiler
         }
 
         $charTypes = [
-            'array'   => strContains( $varDefinition, '[' ) &&
-                         strContains( $varDefinition, ']' ),
-            'object'  => strContains( $varDefinition, '->' ) ||
-                         ( strContains( $varDefinition, '(' ) &&
-                           strContains( $varDefinition, ')' ) ),
-            'space'   => strContains( $varDefinition, ' ' ),
+            'array'   => \str_contains( $varDefinition, '[' ) &&
+                         \str_contains( $varDefinition, ']' ),
+            'object'  => \str_contains( $varDefinition, '->' ) ||
+                         ( \str_contains( $varDefinition, '(' ) &&
+                           \str_contains( $varDefinition, ')' ) ),
+            'space'   => \str_contains( $varDefinition, ' ' ),
             'special' => (bool) preg_match( '~[^A-Za-z_0-9\\[\\]()>\'"$ -]+~', $varDefinition ),
         ];
 
