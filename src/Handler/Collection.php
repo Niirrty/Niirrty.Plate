@@ -72,7 +72,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
      *
      * @return bool
      */
-    public function offsetExists( $offset ): bool
+    public function offsetExists( mixed $offset ): bool
     {
 
         return isset( $this->data[ $offset ] );
@@ -84,7 +84,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
      *
      * @return IHandler
      */
-    public function offsetGet( $offset ): IHandler
+    public function offsetGet( mixed $offset ): mixed
     {
 
         return $this->data[ $offset ];
@@ -97,7 +97,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
      *
      * @throws ArgumentException
      */
-    public function offsetSet( $offset, $value )
+    public function offsetSet( mixed $offset, mixed $value ) : void
     {
 
         if ( null === $value || !( $value instanceof IHandler ) )
@@ -127,7 +127,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
     /**
      * @param mixed $offset
      */
-    public function offsetUnset( $offset )
+    public function offsetUnset( mixed $offset ) : void
     {
 
         unset( $this->data[ $offset ] );
@@ -151,14 +151,14 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
 
     }
 
-    public function next()
+    public function next() : void
     {
 
         ++$this->position;
 
     }
 
-    public function rewind()
+    public function rewind() : void
     {
 
         $this->position = 0;
