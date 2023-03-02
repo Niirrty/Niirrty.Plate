@@ -73,7 +73,9 @@ class BlockTagParser extends PlateTagParser
             return true;
         }
 
-        if ( 'foreach' === strtolower( $tmp[ 0 ] ) )
+        $tmp[ 0 ] = \strtolower( $tmp[ 0 ] );
+
+        if ( 'foreach' === $tmp[ 0 ] )
         {
             // foreach from=$Varname key=key value=value
             $attr = ArrayHelper::ParseHtmlAttributes( $tmp[ 1 ] );
@@ -102,7 +104,7 @@ class BlockTagParser extends PlateTagParser
             return true;
         }
 
-        if ( 'for' === \strtolower( $tmp[ 0 ] ) )
+        if ( 'for' === $tmp[ 0 ] )
         {
             // for from=$array index=i count=c step=1 init=0
             $attr = ArrayHelper::ParseHtmlAttributes( $tmp[ 1 ] );
@@ -153,11 +155,20 @@ class BlockTagParser extends PlateTagParser
                 ->setAfterTagClose( $afterTagClose );
             return true;
         }
-
+        
         $tmp[ 1 ] = \trim( $tmp[ 1 ] );
+
+        if ( 'elseif' === $tmp[ 0 ] )
+        {
+            $this->_compiled = ( new PlateTagCompiled() )
+                 ->setPhpCode( "<" . "?php } else if ( {$tmp[1]} ) { ?>" )
+                 ->setAfterTagClose( $afterTagClose );
+            return true;
+        }
+
         $this->_compiled = ( new PlateTagCompiled() )
-            ->setPhpCode( "<" . "?php {$tmp[0]} ( {$tmp[1]} ) { ?>" )
-            ->setAfterTagClose( $afterTagClose );
+             ->setPhpCode( "<" . "?php {$tmp[0]} ( {$tmp[1]} ) { ?>" )
+             ->setAfterTagClose( $afterTagClose );
         return true;
 
     }
