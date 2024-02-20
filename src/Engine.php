@@ -164,7 +164,6 @@ class Engine implements \ArrayAccess
         $cacheFile = $compiler->compile( $tplFile, $package );
 
         \ob_start();
-        /** @noinspection PhpIncludeInspection */
         include $cacheFile;
         $result = \ob_get_contents();
         \ob_end_clean();
@@ -188,7 +187,7 @@ class Engine implements \ArrayAccess
      * @throws DBException
      * @throws \Throwable
      */
-    public function display( string $tplFile, ?string $package = null, ?IHandler $handler = null )
+    public function display( string $tplFile, ?string $package = null, ?IHandler $handler = null ) : void
     {
 
         $compiler = new Compiler( $this->config );
@@ -202,14 +201,11 @@ class Engine implements \ArrayAccess
 
         if ( null === $handler )
         {
-            /** @noinspection PhpIncludeInspection */
             include $cacheFile;
-
             return;
         }
 
         \ob_start();
-        /** @noinspection PhpIncludeInspection */
         include $cacheFile;
         $result = \ob_get_contents();
         \ob_end_clean();
@@ -258,12 +254,11 @@ class Engine implements \ArrayAccess
      * @throws DBException
      * @throws \Throwable
      */
-    protected function includeWithCaching( string $templateFile, ?string $package = null )
+    protected function includeWithCaching( string $templateFile, ?string $package = null ) : void
     {
 
         $comp = new Compiler( $this->config );
         $cacheFile = Path::Unixize( $comp->compile( $templateFile, $package ) );
-        /** @noinspection PhpIncludeInspection */
         include $cacheFile;
     }
 

@@ -24,7 +24,7 @@ $config = \Niirrty\Plate\Config::FromINIFile(
 );
 
 #$config->setCacheCompileLifetime( 5 );
-$config->setCacheMode( \Niirrty\Plate\Config::CACHE_MODE_EDITOR );
+$config->setCacheMode( \Niirrty\Plate\CacheMode::EDITOR );
 
 $translator = new \Niirrty\Translation\Translator( $locale );
 $translatorSource = new \Niirrty\Translation\Sources\PHPFileSource( 'trans://', $locale, $vfsManager );

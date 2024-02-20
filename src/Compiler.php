@@ -118,7 +118,7 @@ class Compiler
 
         $compileFolder = $this->_config->getCacheCompileFolder();
         $compileLifeTime = $this->_config->getCacheCompileLifetime();
-        if ( null === $compileFolder || '' === $compileFolder )
+        if ( '' === $compileFolder )
         {
             throw new CompileException( $tplFile, 'There is no usable compile folder configured!' );
         }
@@ -171,7 +171,7 @@ class Compiler
         $this->initCacheDbConnection();
 
         if ( 0 < $compileLifeTime &&
-             Config::CACHE_MODE_EDITOR !== $this->_config->getCacheMode() &&
+             CacheMode::EDITOR !== $this->_config->getCacheMode() &&
              \file_exists( $compiledFile ) )
         {
             // There is a lifetime defined and the cache file exists
@@ -257,7 +257,7 @@ class Compiler
      * @param string|null $package
      * @throws \Throwable
      */
-    private function parse( string $tplFilePath, string $compiledFile, ?string $package )
+    private function parse( string $tplFilePath, string $compiledFile, ?string $package ) : void
     {
 
         $w = null;
@@ -441,7 +441,7 @@ class Compiler
      * @throws ArgumentException
      * @throws DBException
      */
-    private function initCacheDbConnection()
+    private function initCacheDbConnection() : void
     {
 
         if ( isset( static::$_cacheDBs[ $this->_config->getCacheCompileFolder() ] ) )

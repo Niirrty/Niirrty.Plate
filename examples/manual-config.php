@@ -17,7 +17,7 @@ $config = ( new \Niirrty\Plate\Config() )
    ->setOpenChars( '{{' )
    ->setCloseChars( '}}' )
    ->setCacheCompileFolder( __DIR__ . '/tpl-cache' )
-   ->setCacheMode( \Niirrty\Plate\Config::CACHE_MODE_EDITOR );
+   ->setCacheMode( \Niirrty\Plate\CacheMode::EDITOR );
 
 $translator = new \Niirrty\Translation\Translator( $locale );
 $translatorSource = new \Niirrty\Translation\Sources\PHPFileSource( 'trans://', $locale, $vfsManager );

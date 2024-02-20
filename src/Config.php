@@ -87,21 +87,6 @@ class Config
         self::FILE_TYPE_INI, self::FILE_TYPE_JSON, self::FILE_TYPE_PHP, self::FILE_TYPE_XML,
     ];
 
-    /**
-     * Use the current defined cache settings.
-     */
-    public const CACHE_MODE_USER = 'user';
-
-    /**
-     * Ignore all cache settings and rebuild all required caches if a template is used.
-     */
-    public const CACHE_MODE_EDITOR = 'editor';
-
-    /**
-     * All known cache modes
-     */
-    public const KNOWN_CACHE_MODES = [ self::CACHE_MODE_USER, self::CACHE_MODE_EDITOR ];
-
     #endregion
 
 
@@ -212,12 +197,12 @@ class Config
      *
      * The other `editor` mode means, ignore all cache setting and rebuild all required caches if a template is used.
      *
-     * @return string
+     * @return CacheMode
      */
-    public function getCacheMode(): string
+    public function getCacheMode(): CacheMode
     {
 
-        return $this->data[ 'cache' ][ 'mode' ];
+        return CacheMode::tryFrom( $this->data[ 'cache' ][ 'mode' ] ) ?? CacheMode::USER;
 
     }
 
@@ -311,7 +296,7 @@ class Config
     }
 
     /**
-     * Sets the template engine cache mode. (see `::CACHE_MODE_*` class constants)
+     * Sets the template engine cache mode.
      *
      * It can be used in 2 different modes.
      *
@@ -319,22 +304,14 @@ class Config
      *
      * The other `editor` mode means, ignore all cache setting and rebuild all required caches if a template is used.
      *
-     * @param string $mode
+     * @param CacheMode $mode
      *
      * @return Config
-     * @throws ArgumentException
      */
-    public function setCacheMode( string $mode ): Config
+    public function setCacheMode( CacheMode $mode ): Config
     {
 
-        if ( !\in_array( $mode, static::KNOWN_CACHE_MODES, true ) )
-        {
-            throw new ArgumentException(
-                'cacheMode', $mode, 'Can not use a unknown cache mode!'
-            );
-        }
-
-        $this->data[ 'cache' ][ 'mode' ] = $mode;
+        $this->data[ 'cache' ][ 'mode' ] = $mode->value;
 
         return $this;
 
@@ -438,9 +415,10 @@ class Config
         }
         if ( isset( $data[ 'cache' ] ) && \is_array( $data[ 'cache' ] ) )
         {
-            if ( isset( $data[ 'cache' ][ 'mode' ] ) && \in_array( $data[ 'cache' ][ 'mode' ], [ 'user', 'editor' ] ) )
+            if ( isset( $data[ 'cache' ][ 'mode' ] ) &&
+               ( null !== ( $cacheMode = CacheMode::tryFrom( $data[ 'cache' ][ 'mode' ] ) ) ) )
             {
-                $this->setCacheMode( $data[ 'cache' ][ 'mode' ] );
+                $this->setCacheMode( $cacheMode );
             }
             if ( isset( $data[ 'cache' ][ 'folder' ] ) && \is_string( $data[ 'cache' ][ 'folder' ] ) )
             {
@@ -556,21 +534,14 @@ class Config
 
         $ext = \ltrim( \strtolower( File::GetExtension( $configFile ) ), '.' );
 
-        switch ( $ext )
+        return match ( $ext )
         {
-            case 'php':
-            case 'php5':
-            case 'inc':
-                return static::FromPHPFile( $configFile, $ext, $vfsManager );
-            case 'ini':
-                return static::FromINIFile( $configFile, 'ini', $vfsManager );
-            case 'json':
-                return static::FromINIFile( $configFile, 'json', $vfsManager );
-            case 'xml':
-                return static::FromINIFile( $configFile, 'xml', $vfsManager );
-        }
-
-        return null;
+            'php', 'php5', 'inc' => static::FromPHPFile(  $configFile, $ext, $vfsManager ),
+            'ini'                => static::FromINIFile(  $configFile, 'ini', $vfsManager ),
+            'json'               => static::FromJSONFile( $configFile, 'json', $vfsManager ),
+            'xml'                => static::FromXMLFile(  $configFile, 'xml', $vfsManager ),
+            default              => null,
+        };
 
     }
 
@@ -624,7 +595,6 @@ class Config
 
         try
         {
-            /** @noinspection PhpIncludeInspection */
             $data = include $configFile;
         }
         catch ( Throwable $ex )
@@ -964,7 +934,7 @@ class Config
             ->setOpenChars( $data[ 'openChars' ] ?? '{' )
             ->setCloseChars( $data[ 'closeChars' ] ?? '}' )
             ->setTemplatesFolder( $data[ 'templatesFolder' ] ?? '' )
-            ->setCacheMode( $data[ 'cache.mode' ] ?? 'user' )
+            ->setCacheMode( CacheMode::tryFrom( $data[ 'cache.mode' ] ) ?? CacheMode::USER )
             ->setCacheCompileFolder( $data[ 'cache.folder' ] ?? '' )
             ->setCacheCompileLifetime( $data[ 'cache.lifetime' ] ?? static::DEFAULTS[ 'cache' ][ 'lifetime' ] );
 
@@ -1002,9 +972,10 @@ class Config
         }
         if ( isset( $xml->cache ) )
         {
-            if ( isset( $xml->cache->mode ) )
+            if ( isset( $xml->cache->mode ) &&
+               ( null !== ( $cacheMode = CacheMode::tryFrom( (string) $xml->cache->mode ) ) ) )
             {
-                $out->setCacheMode( (string) $xml->cache->mode );
+                $out->setCacheMode( $cacheMode );
             }
             if ( isset( $xml->cache->folder ) )
             {
