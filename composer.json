@@ -14,7 +14,7 @@
       "niirrty/niirrty.io": "^0.6",
       "niirrty/niirrty.db": "^0.6",
       "niirrty/niirrty.io.vfs": "^0.6",
-      "niirrty/niirrty.translation": "^0.6g",
+      "niirrty/niirrty.translation": "^0.6",
       "ext-json": "*",
       "ext-simplexml": "*",
       "ext-tidy": "*"
