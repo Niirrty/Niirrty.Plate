@@ -4,7 +4,7 @@ The template engine comes with a set of predefined, known template tags
 
 ## Extend with own tags
 
-Since version 0.3.1 there are user defined template supported.
+Since version 0.3.1 there are user defined template tags supported.
 
 For an example implementation see `examples/MyHelpTagParser.php`
 

@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2021, Niirrty
+ * @copyright  © 2017-2026, Niirrty
  * @package    Niirrty\Plate\Handler
  * @since      2017-11-04
- * @version    0.4.0
+ * @version    0.6.4
  */
 
 
@@ -100,7 +100,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
     public function offsetSet( mixed $offset, mixed $value ) : void
     {
 
-        if ( null === $value || !( $value instanceof IHandler ) )
+        if ( false === ( $value instanceof IHandler ) )
         {
             throw new ArgumentException(
                 'value',
@@ -113,7 +113,7 @@ class Collection implements IHandler, \ArrayAccess, \Iterator, \Countable
         {
             $this->data[] = $value;
         }
-        else if ( ! \is_int( $offset ) )
+        else if ( false === \is_int( $offset ) )
         {
             $this->data[] = $value;
         }

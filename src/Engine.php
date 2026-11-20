@@ -1,10 +1,10 @@
 <?php
 /**
  * @author     Ni Irrty <niirrty+code@gmail.com>
- * @copyright  © 2017-2021, Ni Irrty
+ * @copyright  © 2017-2026, Ni Irrty
  * @package    Niirrty\Plate
  * @since      2017-11-04
- * @version    0.4.0
+ * @version    0.6.4
  */
 
 
@@ -63,7 +63,7 @@ class Engine implements \ArrayAccess
 
     #region // – – –   P U B L I C   M E T H O D S   – – – – – – – – – – – – – – – – – – – – – – – –
 
-    public function __get( $name )
+    public function __get( string $name )
     {
 
         switch ( $name )
@@ -83,7 +83,7 @@ class Engine implements \ArrayAccess
 
     }
 
-    public function assign( string $name, $value ): Engine
+    public function assign( string $name, mixed $value ): Engine
     {
 
         $this->data[ $name ] = $value;
@@ -104,21 +104,21 @@ class Engine implements \ArrayAccess
 
     }
 
-    public function __set( $name, $value )
+    public function __set( string $name, mixed $value )
     {
 
         $this->assign( $name, $value );
 
     }
 
-    public function __isset( $name )
+    public function __isset( string $name )
     {
 
         return isset( $this->data[ $name ] );
 
     }
 
-    public function __unset( $name )
+    public function __unset( string $name )
     {
 
         unset( $this->data[ $name ] );

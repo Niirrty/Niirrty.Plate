@@ -1,7 +1,7 @@
 <?php
 /**
  * @package Niirrty\Plate\TagParser
- * @version 0.4.0
+ * @version 0.6.4
  * @since   2021-07-03
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */

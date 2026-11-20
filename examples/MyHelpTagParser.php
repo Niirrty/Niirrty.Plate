@@ -1,7 +1,7 @@
 <?php
 /**
  * @package ${NAMESPACE}
- * @version 0.3.1
+ * @version 0.6.4
  * @since   2021-07-10
  * @author  Ni Irrty <niirrty+code@gmail.com>
  */

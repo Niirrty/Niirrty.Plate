@@ -104,7 +104,7 @@ return [
 
 ```xml
 <?xml version="1.0" charset="utf-8"?>
-<config type="UK.Plate">
+<config type="Niirrty.Plate">
    <openChars>{</openChars>
    <closeChars>}</closeChars>
    <templatesFolder>tplbase:/templates</ignoreWhitespace>
